@@ -1,3 +1,7 @@
+# Intellij files
+.idea/
+CompteurCalories.iml
+
 # Eclipse files
 .project
 .classpath
