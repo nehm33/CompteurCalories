@@ -1,0 +1,39 @@
+@charset "UTF-8";
+.conteneur {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  	grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.form {
+	background-color: #f6f8fa;
+	border: 1px solid #d8dce3;
+	grid-row: 2 / 3;
+    grid-column: 3 / 4;
+    border-radius: 5px;
+}
+
+h1 {
+	grid-row: 1;
+	grid-column: 1 / 6;
+	text-align: center;
+}
+
+.formulaire {
+	line-height: 20px;
+	padding: 5px;
+	font-size: 14px;
+}
+
+label, input {
+	margin: 10px;
+	border-radius: 5px;
+	width: 250px;
+	height : 25px
+}
+
+#sub-btn {
+	background-color: #1f883d;
+	color: #ffffff;
+	border-color: #1f232826;
+}

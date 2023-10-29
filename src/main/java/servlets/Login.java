@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class Login extends HttpServlet {
-	private static final long serialVersionUID = 1L;
        
     public Login() {
         super();
