@@ -13,7 +13,7 @@
     border-radius: 5px;
 }
 
-h1 {
+.head {
 	grid-row: 1;
 	grid-column: 1 / 6;
 	text-align: center;
@@ -36,4 +36,18 @@ label, input {
 	background-color: #1f883d;
 	color: #ffffff;
 	border-color: #1f232826;
+}
+
+.error {
+  margin: 0 auto;
+  margin-bottom: 8px;
+  font-size: 12px;
+  height: 40px;
+  text-align: center;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 6px;
+  background-color: #ffebe9;
+  border-color: #ff818266;
+  color: black;
 }

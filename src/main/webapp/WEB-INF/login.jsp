@@ -14,8 +14,15 @@
 </head>
 <body>
     <div class="conteneur">
-        <h1>Sign in to CompteurCalories</h1>
-        <div class="form"> 
+        <div class="head">
+        	<h1>Sign in to CompteurCalories</h1>
+        	<c:if test="${ !empty error }">
+            	<div class="error">
+            		<p><c:out value="${ error }" /></p>
+            	</div>
+            </c:if>
+        </div>
+        <div class="form">
             <form class="formulaire" method="post" action="">
                 <label for="username">Username</label><br>
                 <input type="text" name="username" id="username" placeholder="Username" required><br>
