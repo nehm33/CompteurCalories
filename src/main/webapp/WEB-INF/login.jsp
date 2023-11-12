@@ -10,8 +10,6 @@
     <title>Sign in</title>
     <link rel="stylesheet" type="text/css" href="css/login.css" />
 </head>
-<meta charset="UTF-8">
-</head>
 <body>
     <div class="conteneur">
         <div class="head">

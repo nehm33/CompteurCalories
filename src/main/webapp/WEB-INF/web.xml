@@ -19,4 +19,14 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
+  <servlet>
+    <description></description>
+    <display-name>Journal</display-name>
+    <servlet-name>Journal</servlet-name>
+    <servlet-class>servlets.Journal</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Journal</servlet-name>
+    <url-pattern>/Journal</url-pattern>
+  </servlet-mapping>
 </web-app>

@@ -29,7 +29,7 @@ public class Login extends HttpServlet {
 			user.setPassword(request.getParameter("password"));
 			User searchedUser = DaoFactory.getInstance().getUserDao().get(username);
 			if (user.equals(searchedUser)) {
-				// TODO Redirect to another page
+				response.sendRedirect("/CompteurCalories/Journal");
 			} else {
 				request.setAttribute("error", "Username or password incorrect");
 				this.getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
