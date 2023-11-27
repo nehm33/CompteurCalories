@@ -1,9 +1,11 @@
 package db;
 
-public interface Dao<T> {
+public abstract class Dao<T> {
+    protected DaoFactory daoFactory;
 
-    boolean create(T obj) throws DaoException;
-    T get(String id) throws DaoException;
-    boolean update(T obj) throws DaoException;
-    boolean delete(T obj) throws DaoException;
+
+    public abstract boolean create(T obj) throws DaoException;
+    public abstract T get(String id) throws DaoException;
+    public abstract boolean update(T obj) throws DaoException;
+    public abstract boolean delete(T obj) throws DaoException;
 }

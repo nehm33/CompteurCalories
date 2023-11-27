@@ -2,6 +2,9 @@ package db;
 
 import beans.User;
 
-public interface UserDao extends Dao<User> {
+public abstract class UserDao extends Dao<User> {
 
+    public UserDao(DaoFactory daoFactory) {
+        this.daoFactory = daoFactory;
+    }
 }

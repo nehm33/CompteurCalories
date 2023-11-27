@@ -2,5 +2,8 @@ package db;
 
 import beans.Journal;
 
-public interface JournalDao extends Dao<Journal> {
+public abstract class JournalDao extends Dao<Journal> {
+    public JournalDao(DaoFactory daoFactory) {
+        this.daoFactory = daoFactory;
+    }
 }

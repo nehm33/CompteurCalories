@@ -7,16 +7,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserDaoImpl implements UserDao {
-
-    private final DaoFactory daoFactory;
+public class UserDaoImpl extends UserDao {
 
     public UserDaoImpl(DaoFactory daoFactory) {
-        this.daoFactory = daoFactory;
+        super(daoFactory);
     }
 
     @Override
-    public boolean create(User obj) {
+    public boolean create(User obj) throws DaoException {
         return false;
     }
 

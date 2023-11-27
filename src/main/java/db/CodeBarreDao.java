@@ -2,5 +2,9 @@ package db;
 
 import beans.CodeBarre;
 
-public interface CodeBarreDao extends Dao<CodeBarre> {
+public abstract class CodeBarreDao extends Dao<CodeBarre> {
+
+    public CodeBarreDao(DaoFactory daoFactory) {
+        this.daoFactory = daoFactory;
+    }
 }

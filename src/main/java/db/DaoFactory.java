@@ -40,4 +40,6 @@ public class DaoFactory {
     public UserDao getUserDao() {
         return new UserDaoImpl(this);
     }
+
+    public CodeBarreDao getCodeBarreDao() {return new CodeBarreImpl(this); }
 }
