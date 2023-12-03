@@ -43,7 +43,7 @@ public class UserDaoImpl extends UserDao {
     }
 
     @Override
-    public boolean update(User obj) {
+    public boolean update(User obj, String oldId) {
         return false;
     }
 

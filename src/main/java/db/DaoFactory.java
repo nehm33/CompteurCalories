@@ -41,5 +41,9 @@ public class DaoFactory {
         return new UserDaoImpl(this);
     }
 
-    public CodeBarreDao getCodeBarreDao() {return new CodeBarreImpl(this); }
+    public CodeBarreDao getCodeBarreDao() {return new CodeBarreDaoImpl(this); }
+
+    public AlimentDao getAlimentDao() {
+        return new AlimentDaoImpl(this);
+    }
 }
