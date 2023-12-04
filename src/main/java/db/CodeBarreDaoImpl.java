@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class CodeBarreDaoImpl extends CodeBarreDao {
 
@@ -23,11 +24,7 @@ public class CodeBarreDaoImpl extends CodeBarreDao {
                     preparedStatement.setString(2, obj.getAliment());
                     preparedStatement.setString(3, obj.getMarque());
                     int nbRows = preparedStatement.executeUpdate();
-                    if (nbRows > 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return nbRows > 0;
                 }
             } else {
                 throw new DaoException("Impossible de se connecter à la base de données");
@@ -63,7 +60,7 @@ public class CodeBarreDaoImpl extends CodeBarreDao {
     }
 
     @Override
-    public boolean update(CodeBarre obj, String oldId) throws DaoException {
+    public boolean update(CodeBarre obj, CodeBarre oldObj) throws DaoException {
         try (Connection connection = daoFactory.getConnection()) {
             if (connection != null) {
                 connection.setAutoCommit(true);
@@ -71,17 +68,9 @@ public class CodeBarreDaoImpl extends CodeBarreDao {
                     preparedStatement.setString(1, obj.getCodeBarre());
                     preparedStatement.setString(2, obj.getAliment());
                     preparedStatement.setString(3, obj.getMarque());
-                    if (oldId != null && !oldId.isEmpty()) {
-                        preparedStatement.setString(4, oldId);
-                    } else {
-                        preparedStatement.setString(4, obj.getCodeBarre());
-                    }
+                    preparedStatement.setString(4, Objects.requireNonNullElse(oldObj, obj).getCodeBarre());
                     int nbRows = preparedStatement.executeUpdate();
-                    if (nbRows > 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return nbRows > 0;
                 }
             } else {
                 throw new DaoException("Impossible de se connecter à la base de données");
@@ -98,11 +87,7 @@ public class CodeBarreDaoImpl extends CodeBarreDao {
                 try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM codeBarre WHERE code_barre = ?;")) {
                     preparedStatement.setString(1, obj.getCodeBarre());
                     int nbRows = preparedStatement.executeUpdate();
-                    if (nbRows > 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return nbRows > 0;
                 }
             } else {
                 throw new DaoException("Impossible de se connecter à la base de données");

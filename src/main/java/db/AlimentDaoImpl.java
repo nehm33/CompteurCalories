@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class AlimentDaoImpl extends AlimentDao {
 
@@ -71,11 +72,7 @@ public class AlimentDaoImpl extends AlimentDao {
                     preparedStatement.setDouble(50, obj.getZn());
 
                     int nbRows = preparedStatement.executeUpdate();
-                    if (nbRows > 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return nbRows > 0;
                 }
             } else {
                 throw new DaoException("Impossible de se connecter à la base de données");
@@ -158,7 +155,7 @@ public class AlimentDaoImpl extends AlimentDao {
     }
 
     @Override
-    public boolean update(Aliment obj, String oldId) throws DaoException {
+    public boolean update(Aliment obj, Aliment oldObj) throws DaoException {
         try (Connection connection = daoFactory.getConnection()) {
             if (connection != null) {
                 connection.setAutoCommit(true);
@@ -213,17 +210,9 @@ public class AlimentDaoImpl extends AlimentDao {
                     preparedStatement.setDouble(48, obj.getV());
                     preparedStatement.setDouble(49, obj.getSn());
                     preparedStatement.setDouble(50, obj.getZn());
-                    if (oldId != null && !oldId.isEmpty()) {
-                        preparedStatement.setString(51, oldId);
-                    } else {
-                        preparedStatement.setString(51, obj.getNom());
-                    }
+                    preparedStatement.setString(51, Objects.requireNonNullElse(oldObj, obj).getNom());
                     int nbRows = preparedStatement.executeUpdate();
-                    if (nbRows > 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return nbRows > 0;
                 }
             } else {
                 throw new DaoException("Impossible de se connecter à la base de données");
@@ -240,11 +229,7 @@ public class AlimentDaoImpl extends AlimentDao {
                 try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM aliments WHERE nomAliment = ?;")) {
                     preparedStatement.setString(1, obj.getNom());
                     int nbRows = preparedStatement.executeUpdate();
-                    if (nbRows > 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return nbRows > 0;
                 }
             } else {
                 throw new DaoException("Impossible de se connecter à la base de données");
