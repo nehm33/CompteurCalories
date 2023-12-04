@@ -1,5 +1,7 @@
 package beans;
 
+import java.util.Objects;
+
 public class Aliment {
 
     private String nom;
@@ -452,6 +454,19 @@ public class Aliment {
 
     public void setZn(double zn) {
         Zn = zn;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Aliment aliment = (Aliment) o;
+        return Double.compare(calories, aliment.calories) == 0 && Double.compare(matieresGrasses, aliment.matieresGrasses) == 0 && Double.compare(proteines, aliment.proteines) == 0 && Double.compare(glucides, aliment.glucides) == 0 && Double.compare(sel, aliment.sel) == 0 && Double.compare(cholesterol, aliment.cholesterol) == 0 && Objects.equals(nom, aliment.nom) && Objects.equals(unite, aliment.unite);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, calories, unite, matieresGrasses, proteines, glucides, sel, cholesterol);
     }
 
     public CodeBarre getCodeBarre() {

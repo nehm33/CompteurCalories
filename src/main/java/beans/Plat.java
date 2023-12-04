@@ -31,4 +31,16 @@ public class Plat {
     public void setAliments(Map<Aliment, Double> aliments) {
         this.aliments = aliments;
     }
+
+    public void addAliment(Aliment aliment, double quantite) {
+        if (aliments.containsKey(aliment)) {
+            aliments.put(aliment, aliments.get(aliment)+quantite);
+        } else {
+            aliments.put(aliment, quantite);
+        }
+    }
+
+    public void removeAliment(Aliment aliment) {
+        aliments.remove(aliment);
+    }
 }
