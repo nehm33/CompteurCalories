@@ -46,4 +46,8 @@ public class DaoFactory {
     public AlimentDao getAlimentDao() {
         return new AlimentDaoImpl(this);
     }
+
+    public PlatDao getPlatDao() {
+        return new PlatDaoImpl(this);
+    }
 }
