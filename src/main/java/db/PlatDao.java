@@ -8,8 +8,8 @@ public abstract class PlatDao extends Dao<Plat> {
         this.daoFactory = daoFactory;
     }
 
-    public abstract boolean createAliment(Plat plat, Aliment aliment) throws DaoException;
-    public abstract boolean getAliment(Plat plat, String idAliment) throws DaoException;
-    public abstract boolean update(Plat plat, Aliment aliment) throws DaoException;
-    public abstract boolean delete(Plat plat, Aliment aliment) throws DaoException;
+    protected abstract boolean createAliment(Plat plat, Aliment aliment, double quantite) throws DaoException;
+    protected abstract boolean getAliments(Plat plat) throws DaoException;
+    protected abstract boolean updateAliment(Plat plat, Aliment aliment, double quantite) throws DaoException;
+    protected abstract boolean deleteAliment(Plat plat, Aliment aliment) throws DaoException;
 }

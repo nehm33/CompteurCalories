@@ -1,5 +1,6 @@
 package beans;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Plat {
@@ -33,6 +34,9 @@ public class Plat {
     }
 
     public void addAliment(Aliment aliment, double quantite) {
+        if (aliments == null) {
+            aliments = new HashMap<>();
+        }
         if (aliments.containsKey(aliment)) {
             aliments.put(aliment, aliments.get(aliment)+quantite);
         } else {
@@ -42,5 +46,16 @@ public class Plat {
 
     public void removeAliment(Aliment aliment) {
         aliments.remove(aliment);
+    }
+
+    public boolean hasAliment(Aliment aliment) {
+        return aliments != null && aliments.containsKey(aliment);
+    }
+
+    public double getQuantiteOf(Aliment aliment) {
+        if (hasAliment(aliment)) {
+            return aliments.get(aliment);
+        }
+        return 0;
     }
 }
