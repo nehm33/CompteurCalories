@@ -50,4 +50,8 @@ public class DaoFactory {
     public PlatDao getPlatDao() {
         return new PlatDaoImpl(this);
     }
+
+    public JournalDao getJournalDao() {
+        return new JournalDaoImpl(this);
+    }
 }
