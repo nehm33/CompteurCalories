@@ -93,6 +93,14 @@ public class PlatDaoImpl extends PlatDao {
                             }
                         }
                     }
+                    for (Aliment aliment : oldObj.getAliments().keySet()) {
+                        if (!obj.hasAliment(aliment)) {
+                            if (!deleteAliment(obj, aliment)) {
+                                connection.rollback();
+                                return false;
+                            }
+                        }
+                    }
                     connection.commit();
                     return true;
                 }
