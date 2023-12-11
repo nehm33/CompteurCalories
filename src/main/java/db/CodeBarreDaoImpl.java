@@ -40,15 +40,16 @@ public class CodeBarreDaoImpl extends CodeBarreDao {
             if (connection != null) {
                 try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM codeBarre WHERE code_barre = ?;")) {
                     preparedStatement.setString(1, id);
-                    ResultSet result = preparedStatement.executeQuery();
-                    if (result.next()) {
-                        CodeBarre codeBarre = new CodeBarre();
-                        codeBarre.setCodeBarre(result.getString("code_barre"));
-                        codeBarre.setAliment(result.getString("nomAliment"));
-                        codeBarre.setMarque(result.getString("marque"));
-                        return codeBarre;
-                    } else {
-                        return null;
+                    try (ResultSet result = preparedStatement.executeQuery()) {
+                        if (result.next()) {
+                            CodeBarre codeBarre = new CodeBarre();
+                            codeBarre.setCodeBarre(result.getString("code_barre"));
+                            codeBarre.setAliment(result.getString("nomAliment"));
+                            codeBarre.setMarque(result.getString("marque"));
+                            return codeBarre;
+                        } else {
+                            return null;
+                        }
                     }
                 }
             } else {
@@ -84,6 +85,7 @@ public class CodeBarreDaoImpl extends CodeBarreDao {
     public boolean delete(CodeBarre obj) throws DaoException {
         try (Connection connection = daoFactory.getConnection()) {
             if (connection != null) {
+                connection.setAutoCommit(true);
                 try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM codeBarre WHERE code_barre = ?;")) {
                     preparedStatement.setString(1, obj.getCodeBarre());
                     int nbRows = preparedStatement.executeUpdate();

@@ -88,63 +88,65 @@ public class AlimentDaoImpl extends AlimentDao {
             if (connection != null) {
                 try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM aliments WHERE nomAliment = ?;")) {
                     preparedStatement.setString(1, id);
-                    ResultSet result = preparedStatement.executeQuery();
-                    if (result.next()) {
-                        Aliment aliment = new Aliment();
-                        aliment.setNom(result.getString("nomAliment"));
-                        aliment.setCalories(result.getDouble("calories"));
-                        aliment.setUnite(result.getString("unite"));
-                        aliment.setGlucides(result.getDouble("glucides"));
-                        aliment.setSucre(result.getDouble("sucre"));
-                        aliment.setFibres(result.getDouble("fibres"));
-                        aliment.setMatieresGrasses(result.getDouble("Mat_Gras"));
-                        aliment.setMatieresGrassesSatures(result.getDouble("MG_S"));
-                        aliment.setMatieresGrassesMonoInsaturees(result.getDouble("MG_MI"));
-                        aliment.setMatieresGrassesPolyInsaturees(result.getDouble("MG_PI"));
-                        aliment.setMatieresGrassesTrans(result.getDouble("MG_T"));
-                        aliment.setProteines(result.getDouble("proteines"));
-                        aliment.setSel(result.getDouble("sel"));
-                        aliment.setCholesterol(result.getDouble("cholesterol"));
-                        aliment.setVitamineA(result.getDouble("vit_A"));
-                        aliment.setVitamineB1(result.getDouble("vit_B1"));
-                        aliment.setVitamineB2(result.getDouble("vit_B2"));
-                        aliment.setVitamineB3(result.getDouble("vit_B3"));
-                        aliment.setVitamineB5(result.getDouble("vit_B5"));
-                        aliment.setVitamineB6(result.getDouble("vit_B6"));
-                        aliment.setVitamineB8(result.getDouble("vit_B8"));
-                        aliment.setVitamineB11(result.getDouble("vit_B11"));
-                        aliment.setVitamineB12(result.getDouble("vit_B12"));
-                        aliment.setVitamineC(result.getDouble("vit_C"));
-                        aliment.setVitamineD(result.getDouble("vit_D"));
-                        aliment.setVitamineE(result.getDouble("vit_E"));
-                        aliment.setVitamineK(result.getDouble("vit_K"));
-                        aliment.setArs(result.getDouble("Ars"));
-                        aliment.setB(result.getDouble("B"));
-                        aliment.setCa(result.getDouble("Ca"));
-                        aliment.setCl(result.getDouble("Cl"));
-                        aliment.setCholine(result.getDouble("choline"));
-                        aliment.setCr(result.getDouble("Cr"));
-                        aliment.setCo(result.getDouble("Co"));
-                        aliment.setCu(result.getDouble("Cu"));
-                        aliment.setFe(result.getDouble("Fe"));
-                        aliment.setF(result.getDouble("F"));
-                        aliment.setI(result.getDouble("I"));
-                        aliment.setMg(result.getDouble("Mg"));
-                        aliment.setMn(result.getDouble("Mn"));
-                        aliment.setMo(result.getDouble("Mo"));
-                        aliment.setP(result.getDouble("P"));
-                        aliment.setK(result.getDouble("K"));
-                        aliment.setRb(result.getDouble("Rb"));
-                        aliment.setSiO(result.getDouble("SiO"));
-                        aliment.setS(result.getDouble("S"));
-                        aliment.setSe(result.getDouble("Se"));
-                        aliment.setV(result.getDouble("V"));
-                        aliment.setSn(result.getDouble("Sn"));
-                        aliment.setZn(result.getDouble("Zn"));
-                        return aliment;
-                    } else {
-                        return null;
+                    try (ResultSet result = preparedStatement.executeQuery()) {
+                        if (result.next()) {
+                            Aliment aliment = new Aliment();
+                            aliment.setNom(result.getString("nomAliment"));
+                            aliment.setCalories(result.getDouble("calories"));
+                            aliment.setUnite(result.getString("unite"));
+                            aliment.setGlucides(result.getDouble("glucides"));
+                            aliment.setSucre(result.getDouble("sucre"));
+                            aliment.setFibres(result.getDouble("fibres"));
+                            aliment.setMatieresGrasses(result.getDouble("Mat_Gras"));
+                            aliment.setMatieresGrassesSatures(result.getDouble("MG_S"));
+                            aliment.setMatieresGrassesMonoInsaturees(result.getDouble("MG_MI"));
+                            aliment.setMatieresGrassesPolyInsaturees(result.getDouble("MG_PI"));
+                            aliment.setMatieresGrassesTrans(result.getDouble("MG_T"));
+                            aliment.setProteines(result.getDouble("proteines"));
+                            aliment.setSel(result.getDouble("sel"));
+                            aliment.setCholesterol(result.getDouble("cholesterol"));
+                            aliment.setVitamineA(result.getDouble("vit_A"));
+                            aliment.setVitamineB1(result.getDouble("vit_B1"));
+                            aliment.setVitamineB2(result.getDouble("vit_B2"));
+                            aliment.setVitamineB3(result.getDouble("vit_B3"));
+                            aliment.setVitamineB5(result.getDouble("vit_B5"));
+                            aliment.setVitamineB6(result.getDouble("vit_B6"));
+                            aliment.setVitamineB8(result.getDouble("vit_B8"));
+                            aliment.setVitamineB11(result.getDouble("vit_B11"));
+                            aliment.setVitamineB12(result.getDouble("vit_B12"));
+                            aliment.setVitamineC(result.getDouble("vit_C"));
+                            aliment.setVitamineD(result.getDouble("vit_D"));
+                            aliment.setVitamineE(result.getDouble("vit_E"));
+                            aliment.setVitamineK(result.getDouble("vit_K"));
+                            aliment.setArs(result.getDouble("Ars"));
+                            aliment.setB(result.getDouble("B"));
+                            aliment.setCa(result.getDouble("Ca"));
+                            aliment.setCl(result.getDouble("Cl"));
+                            aliment.setCholine(result.getDouble("choline"));
+                            aliment.setCr(result.getDouble("Cr"));
+                            aliment.setCo(result.getDouble("Co"));
+                            aliment.setCu(result.getDouble("Cu"));
+                            aliment.setFe(result.getDouble("Fe"));
+                            aliment.setF(result.getDouble("F"));
+                            aliment.setI(result.getDouble("I"));
+                            aliment.setMg(result.getDouble("Mg"));
+                            aliment.setMn(result.getDouble("Mn"));
+                            aliment.setMo(result.getDouble("Mo"));
+                            aliment.setP(result.getDouble("P"));
+                            aliment.setK(result.getDouble("K"));
+                            aliment.setRb(result.getDouble("Rb"));
+                            aliment.setSiO(result.getDouble("SiO"));
+                            aliment.setS(result.getDouble("S"));
+                            aliment.setSe(result.getDouble("Se"));
+                            aliment.setV(result.getDouble("V"));
+                            aliment.setSn(result.getDouble("Sn"));
+                            aliment.setZn(result.getDouble("Zn"));
+                            return aliment;
+                        } else {
+                            return null;
+                        }
                     }
+
                 }
             } else {
                 throw new DaoException("Impossible de se connecter à la base de données");
@@ -226,6 +228,7 @@ public class AlimentDaoImpl extends AlimentDao {
     public boolean delete(Aliment obj) throws DaoException {
         try (Connection connection = daoFactory.getConnection()) {
             if (connection != null) {
+                connection.setAutoCommit(true);
                 try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM aliments WHERE nomAliment = ?;")) {
                     preparedStatement.setString(1, obj.getNom());
                     int nbRows = preparedStatement.executeUpdate();

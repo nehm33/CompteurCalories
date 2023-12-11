@@ -24,14 +24,15 @@ public class UserDaoImpl extends UserDao {
             if (connection != null) {
                 try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE username = ?;")) {
                     preparedStatement.setString(1, id);
-                    ResultSet result = preparedStatement.executeQuery();
-                    if (result.next()) {
-                        User user = new User();
-                        user.setUsername(result.getString("username"));
-                        user.setPassword(result.getString("password"));
-                        return user;
-                    } else {
-                        return null;
+                    try (ResultSet result = preparedStatement.executeQuery()) {
+                        if (result.next()) {
+                            User user = new User();
+                            user.setUsername(result.getString("username"));
+                            user.setPassword(result.getString("password"));
+                            return user;
+                        } else {
+                            return null;
+                        }
                     }
                 }
             } else {
