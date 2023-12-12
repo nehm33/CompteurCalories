@@ -45,9 +45,7 @@ public class Plat {
     }
 
     public void removeAliment(Aliment aliment) {
-        if (aliments != null) {
-            aliments.remove(aliment);
-        }
+        aliments.remove(aliment);
     }
 
     public boolean hasAliment(Aliment aliment) {
