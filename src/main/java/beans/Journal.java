@@ -32,4 +32,6 @@ public class Journal {
     public void setPlats(Map<Plat, Double> plats) {
         this.plats = plats;
     }
+
+
 }
