@@ -166,15 +166,16 @@ public class PlatDaoImpl extends PlatDao {
             if (connection != null) {
                 try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM recettes WHERE nomPlat = ?;")) {
                     preparedStatement.setString(1, plat.getNom());
-                    ResultSet result = preparedStatement.executeQuery();
-                    while (result.next()) {
-                        String nomAliment = result.getString("nomAliment");
-                        double quantite = result.getDouble("quantite");
-                        Aliment aliment = DaoFactory.getInstance().getAlimentDao().get(nomAliment);
-                        if (aliment != null) {
-                            plat.addAliment(aliment, quantite);
-                        } else {
-                            return false;
+                    try (ResultSet result = preparedStatement.executeQuery()) {
+                        while (result.next()) {
+                            String nomAliment = result.getString("nomAliment");
+                            double quantite = result.getDouble("quantite");
+                            Aliment aliment = DaoFactory.getInstance().getAlimentDao().get(nomAliment);
+                            if (aliment != null) {
+                                plat.addAliment(aliment, quantite);
+                            } else {
+                                return false;
+                            }
                         }
                     }
                     return true;
@@ -193,7 +194,6 @@ public class PlatDaoImpl extends PlatDao {
     protected boolean updateAliment(Plat plat, Aliment aliment, double quantite) {
         try (Connection connection = daoFactory.getConnection()) {
             if (connection != null) {
-                connection.setAutoCommit(true);
                 try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE recettes SET quantite = ? WHERE nomPlat = ? AND nomAliment = ?")) {
                     preparedStatement.setDouble(1, quantite);
                     preparedStatement.setString(2, plat.getNom());
