@@ -79,7 +79,7 @@ CREATE TABLE composition_journal_plat (
     PRIMARY KEY (nom, dateJournal)
 );
 
-CREATE TABLE codeBarre (
+CREATE TABLE code_barre (
     code_barre CHAR(13) PRIMARY KEY,
     nom VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE CASCADE,
     marque VARCHAR(30)

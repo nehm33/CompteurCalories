@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS codeBarre;
+DROP TABLE IF EXISTS code_barre;
 DROP TABLE IF EXISTS recettes;
 DROP TABLE IF EXISTS composition_journal_aliment;
 DROP TABLE IF EXISTS composition_journal_plat;
