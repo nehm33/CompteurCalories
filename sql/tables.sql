@@ -1,7 +1,7 @@
 CREATE DATABASE compteur_calories;
 
 CREATE TABLE aliments (
-    nomAliment VARCHAR(50) PRIMARY KEY,
+    nom VARCHAR(50) PRIMARY KEY,
     calories NUMERIC(7,2) NOT NULL,
     unite VARCHAR(2) DEFAULT 'g',
     glucides NUMERIC(4,1) NOT NULL,
@@ -54,33 +54,45 @@ CREATE TABLE aliments (
 );
 
 CREATE TABLE plats (
-    nomPlat VARCHAR(50) PRIMARY KEY,
+    nom VARCHAR(50) PRIMARY KEY,
     portions NUMERIC(4, 1)
 );
 
 CREATE TABLE recettes (
-    nomPlat VARCHAR(50) REFERENCES plats ON UPDATE CASCADE ON DELETE RESTRICT,
-    nomAliment VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
+    nomPlat VARCHAR(50) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
+    nomAliment VARCHAR(50) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
     quantite NUMERIC(6,1),
     PRIMARY KEY (nomPlat, nomAliment)
 );
 
 CREATE TABLE composition_journal_aliment (
-    nomAliment VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
+    nom VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
     dateJournal TIMESTAMP,
     quantite NUMERIC(6,1),
-    PRIMARY KEY (nomAliment, dateJournal)
+    PRIMARY KEY (nom, dateJournal)
 );
 
 CREATE TABLE composition_journal_plat (
-    nomPlat VARCHAR(50) REFERENCES plats ON UPDATE CASCADE ON DELETE RESTRICT,
+    nom VARCHAR(50) REFERENCES plats ON UPDATE CASCADE ON DELETE RESTRICT,
     dateJournal TIMESTAMP,
     portions NUMERIC(4,1),
-    PRIMARY KEY (nomPlat, dateJournal)
+    PRIMARY KEY (nom, dateJournal)
 );
 
 CREATE TABLE codeBarre (
     code_barre CHAR(13) PRIMARY KEY,
-    nomAliment VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE CASCADE,
+    nom VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE CASCADE,
     marque VARCHAR(30)
+);
+
+CREATE TABLE users (
+  username VARCHAR(50) PRIMARY KEY,
+  password CHAR(68) NOT NULL,
+  enabled SMALLINT NOT NULL
+);
+
+CREATE TABLE authorities (
+  username varchar(50) REFERENCES users,
+  authority varchar(50) NOT NULL,
+  PRIMARY KEY (username,authority)
 );
