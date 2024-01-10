@@ -19,15 +19,15 @@ public class JournalAliment {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @MapsId("nomAliment")
-    private String nomAliment;
+    private Aliment aliment;
 
     @MapsId("date")
     private Date date;
 
     private double quantite;
 
-    public JournalAliment(String nomAliment, Date date, double quantite) {
-        this.nomAliment = nomAliment;
+    public JournalAliment(Aliment aliment, Date date, double quantite) {
+        this.aliment = aliment;
         this.date = date;
         this.quantite = quantite;
     }

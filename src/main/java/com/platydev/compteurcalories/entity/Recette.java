@@ -17,17 +17,17 @@ public class Recette {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @MapsId("nomPlat")
-    private String nomPlat;
+    private Plat plat;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @MapsId("nomAliment")
-    private String nomAliment;
+    private Aliment aliment;
 
     private double quantite;
 
-    public Recette(String nomPlat, String nomAliment, double quantite) {
-        this.nomPlat = nomPlat;
-        this.nomAliment = nomAliment;
+    public Recette(Plat plat, Aliment aliment, double quantite) {
+        this.plat = plat;
+        this.aliment = aliment;
         this.quantite = quantite;
     }
 }

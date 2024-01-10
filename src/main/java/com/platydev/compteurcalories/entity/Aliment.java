@@ -136,9 +136,9 @@ public class Aliment {
     @OneToOne(mappedBy = "aliment", cascade = CascadeType.ALL)
     private CodeBarre codeBarre;
 
-    @OneToMany(mappedBy = "nomAliment", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "aliment", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     private List<Recette> recettes;
 
-    @OneToMany(mappedBy = "nomAliment", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "aliment", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     private List<JournalAliment> journalAlimentList;
 }

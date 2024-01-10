@@ -19,15 +19,15 @@ public class JournalPlat {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @MapsId("nomPlat")
-    private String nomPlat;
+    private Plat plat;
 
     @MapsId("date")
     private Date date;
 
     private double nbPortions;
 
-    public JournalPlat(String nomPlat, Date date, double nbPortions) {
-        this.nomPlat = nomPlat;
+    public JournalPlat(Plat plat, Date date, double nbPortions) {
+        this.plat = plat;
         this.date = date;
         this.nbPortions = nbPortions;
     }

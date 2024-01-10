@@ -20,5 +20,5 @@ public class CodeBarre {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "nom")
-    private String aliment;
+    private Aliment aliment;
 }
