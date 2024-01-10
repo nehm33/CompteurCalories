@@ -62,21 +62,21 @@ CREATE TABLE recettes (
     nom_plat VARCHAR(50) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
     nom_aliment VARCHAR(50) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
     quantite NUMERIC(6,1),
-    PRIMARY KEY (nomPlat, nomAliment)
+    PRIMARY KEY (nom_plat, nom_aliment)
 );
 
 CREATE TABLE composition_journal_aliment (
     nom_aliment VARCHAR(50) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
     date_journal DATE,
     quantite NUMERIC(6,1),
-    PRIMARY KEY (nom, dateJournal)
+    PRIMARY KEY (nom_aliment, date_journal)
 );
 
 CREATE TABLE composition_journal_plat (
     nom_plat VARCHAR(50) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
     date_journal DATE,
     portions NUMERIC(4,1),
-    PRIMARY KEY (nom, dateJournal)
+    PRIMARY KEY (nom_plat, date_journal)
 );
 
 CREATE TABLE code_barre (
