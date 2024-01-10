@@ -8,10 +8,10 @@ CREATE TABLE aliments (
     sucre NUMERIC(4,1) DEFAULT 0,
     fibres NUMERIC(3,1) DEFAULT 0,
     Mat_Gras NUMERIC(4,1) NOT NULL,
-    MG_S NUMERIC(3,1) DEFAULT 0,
-    MG_MI NUMERIC(3,1) DEFAULT 0,
-    MG_PI NUMERIC(3,1) DEFAULT 0,
-    MG_T NUMERIC(3,1) DEFAULT 0,
+    Mat_Gras_S NUMERIC(3,1) DEFAULT 0,
+    Mat_Gras_MI NUMERIC(3,1) DEFAULT 0,
+    Mat_Gras_PI NUMERIC(3,1) DEFAULT 0,
+    Mat_Gras_T NUMERIC(3,1) DEFAULT 0,
     proteines NUMERIC(3,1) NOT NULL,
     sel NUMERIC(3,1) DEFAULT 0,
     cholesterol NUMERIC(5,1) DEFAULT 0,
@@ -59,29 +59,29 @@ CREATE TABLE plats (
 );
 
 CREATE TABLE recettes (
-    nomPlat VARCHAR(50) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
-    nomAliment VARCHAR(50) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
+    nom_plat VARCHAR(50) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
+    nom_aliment VARCHAR(50) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
     quantite NUMERIC(6,1),
     PRIMARY KEY (nomPlat, nomAliment)
 );
 
 CREATE TABLE composition_journal_aliment (
-    nom VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
-    dateJournal TIMESTAMP,
+    nom_aliment VARCHAR(50) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
+    date_journal DATE,
     quantite NUMERIC(6,1),
     PRIMARY KEY (nom, dateJournal)
 );
 
 CREATE TABLE composition_journal_plat (
-    nom VARCHAR(50) REFERENCES plats ON UPDATE CASCADE ON DELETE RESTRICT,
-    dateJournal TIMESTAMP,
+    nom_plat VARCHAR(50) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
+    date_journal DATE,
     portions NUMERIC(4,1),
     PRIMARY KEY (nom, dateJournal)
 );
 
 CREATE TABLE code_barre (
     code_barre CHAR(13) PRIMARY KEY,
-    nom VARCHAR(50) REFERENCES aliments ON UPDATE CASCADE ON DELETE CASCADE,
+    nom_aliment VARCHAR(50) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE CASCADE,
     marque VARCHAR(30)
 );
 

@@ -24,16 +24,16 @@ public class Aliment {
     @Column(name = "Mat_Gras")
     private double matieresGrasses;
 
-    @Column(name = "MG_S")
+    @Column(name = "Mat_Gras_S")
     private double matieresGrassesSatures;
 
-    @Column(name = "MG_MI")
+    @Column(name = "Mat_Gras_MI")
     private double matieresGrassesMonoInsaturees;
 
-    @Column(name = "MG_PI")
+    @Column(name = "Mat_Gras_PI")
     private double matieresGrassesPolyInsaturees;
 
-    @Column(name = "MG_T")
+    @Column(name = "Mat_Gras_T")
     private double matieresGrassesTrans;
 
     private double proteines;

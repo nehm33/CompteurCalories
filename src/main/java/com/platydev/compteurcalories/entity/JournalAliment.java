@@ -1,15 +1,15 @@
 package com.platydev.compteurcalories.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-
 @Entity
 @Table(name = "composition_journal_aliment")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class JournalAliment {
@@ -19,16 +19,8 @@ public class JournalAliment {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @MapsId("nomAliment")
+    @JoinColumn(name = "nom_aliment")
     private Aliment aliment;
 
-    @MapsId("date")
-    private Date date;
-
     private double quantite;
-
-    public JournalAliment(Aliment aliment, Date date, double quantite) {
-        this.aliment = aliment;
-        this.date = date;
-        this.quantite = quantite;
-    }
 }

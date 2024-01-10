@@ -17,10 +17,12 @@ public class Recette {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @MapsId("nomPlat")
+    @JoinColumn(name = "nom_plat")
     private Plat plat;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @MapsId("nomAliment")
+    @JoinColumn(name = "nom_aliment")
     private Aliment aliment;
 
     private double quantite;
