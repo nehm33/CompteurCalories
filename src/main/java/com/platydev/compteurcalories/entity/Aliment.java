@@ -48,6 +48,9 @@ public class Aliment {
 
     private double cholesterol;
 
+    @Column(name = "pro_vit_A")
+    private double provitamineA;
+
     @Column(name = "vit_A")
     private double vitamineA;
 
@@ -68,6 +71,9 @@ public class Aliment {
 
     @Column(name = "vit_B8")
     private double vitamineB8;
+
+    @Column(name = "vit_B9")
+    private double vitamineB9;
 
     @Column(name = "vit_B11")
     private double vitamineB11;
@@ -114,6 +120,8 @@ public class Aliment {
     private double Mn;
 
     private double Mo;
+
+    private double Na;
 
     private double P;
 
