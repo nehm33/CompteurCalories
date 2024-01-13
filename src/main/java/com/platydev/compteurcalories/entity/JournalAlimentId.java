@@ -14,10 +14,11 @@ import java.sql.Date;
 @Getter
 @Setter
 @EqualsAndHashCode
+@ToString
 public class JournalAlimentId implements Serializable {
 
-    @Column(name = "nom_aliment")
-    private String nomAliment;
+    @Column(name = "aliment_id")
+    private long alimentId;
 
     @Basic
     @Column(name = "date_journal")

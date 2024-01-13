@@ -1,7 +1,8 @@
 CREATE DATABASE compteur_calories;
 
 CREATE TABLE aliments (
-    nom VARCHAR(100) PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
+    nom VARCHAR(100) UNIQUE NOT NULL,
     calories NUMERIC(8,3) NOT NULL,
     unite VARCHAR(2) DEFAULT 'g',
     glucides NUMERIC(5,2) NOT NULL,
@@ -29,7 +30,8 @@ CREATE TABLE aliments (
     vit_C NUMERIC(8,3) DEFAULT 0,
     vit_D NUMERIC(8,3) DEFAULT 0,
     vit_E NUMERIC(8,3) DEFAULT 0,
-    vit_K NUMERIC(8,3) DEFAULT 0,
+    vit_K1 NUMERIC(8,3) DEFAULT 0,
+    vit_K2 NUMERIC(8,3) DEFAULT 0,
     Ars NUMERIC(8,3) DEFAULT 0,
     B NUMERIC(8,3) DEFAULT 0,
     Ca NUMERIC(8,3) DEFAULT 0,
@@ -57,34 +59,35 @@ CREATE TABLE aliments (
 );
 
 CREATE TABLE plats (
-    nom VARCHAR(100) PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
+    nom VARCHAR(100) UNIQUE NOT NULL,
     portions NUMERIC(5,2)
 );
 
 CREATE TABLE recettes (
-    nom_plat VARCHAR(100) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
-    nom_aliment VARCHAR(100) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
-    quantite NUMERIC(5,2),
-    PRIMARY KEY (nom_plat, nom_aliment)
+    plat_id BIGSERIAL REFERENCES plats ON UPDATE CASCADE ON DELETE RESTRICT,
+    aliment_id BIGSERIAL REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
+    quantite NUMERIC(7,2),
+    PRIMARY KEY (plat_id, aliment_id)
 );
 
 CREATE TABLE composition_journal_aliment (
-    nom_aliment VARCHAR(100) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
+    aliment_id BIGSERIAL REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
     date_journal DATE,
-    quantite NUMERIC(5,2),
-    PRIMARY KEY (nom_aliment, date_journal)
+    quantite NUMERIC(7,2),
+    PRIMARY KEY (aliment_id, date_journal)
 );
 
 CREATE TABLE composition_journal_plat (
-    nom_plat VARCHAR(100) REFERENCES plats(nom) ON UPDATE CASCADE ON DELETE RESTRICT,
+    plat_id BIGSERIAL REFERENCES plats ON UPDATE CASCADE ON DELETE RESTRICT,
     date_journal DATE,
-    portions NUMERIC(5,2),
-    PRIMARY KEY (nom_plat, date_journal)
+    portions NUMERIC(7,2),
+    PRIMARY KEY (plat_id, date_journal)
 );
 
 CREATE TABLE code_barre (
     code_barre CHAR(13) PRIMARY KEY,
-    nom_aliment VARCHAR(100) REFERENCES aliments(nom) ON UPDATE CASCADE ON DELETE CASCADE,
+    aliment_id BIGSERIAL REFERENCES aliments ON UPDATE CASCADE ON DELETE CASCADE,
     marque VARCHAR(30)
 );
 

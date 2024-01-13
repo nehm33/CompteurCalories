@@ -4,16 +4,19 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "aliments")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class Aliment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     private String nom;
 
     private double calories;
@@ -89,8 +92,11 @@ public class Aliment {
     @Column(name = "vit_E")
     private double vitamineE;
 
-    @Column(name = "vit_K")
-    private double vitamineK;
+    @Column(name = "vit_K1")
+    private double vitamineK1;
+
+    @Column(name = "vit_K2")
+    private double vitamineK2;
 
     private double Ars;
 
@@ -149,177 +155,235 @@ public class Aliment {
     @OneToMany(mappedBy = "aliment", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     private List<JournalAliment> journalAlimentList;
 
+    public Aliment(String nom, double calories, String unite, double matieresGrasses, double matieresGrassesSatures, double matieresGrassesMonoInsaturees, double matieresGrassesPolyInsaturees, double matieresGrassesTrans, double proteines, double glucides, double sucre, double fibres, double sel, double cholesterol, double provitamineA, double vitamineA, double vitamineB1, double vitamineB2, double vitamineB3, double vitamineB5, double vitamineB6, double vitamineB8, double vitamineB9, double vitamineB11, double vitamineB12, double vitamineC, double vitamineD, double vitamineE, double vitamineK1, double vitamineK2, double ars, double b, double ca, double cl, double choline, double cr, double co, double cu, double fe, double f, double i, double mg, double mn, double mo, double na, double p, double k, double rb, double siO, double s, double se, double v, double sn, double zn) {
+        this.nom = nom;
+        this.calories = calories;
+        this.unite = unite;
+        this.matieresGrasses = matieresGrasses;
+        this.matieresGrassesSatures = matieresGrassesSatures;
+        this.matieresGrassesMonoInsaturees = matieresGrassesMonoInsaturees;
+        this.matieresGrassesPolyInsaturees = matieresGrassesPolyInsaturees;
+        this.matieresGrassesTrans = matieresGrassesTrans;
+        this.proteines = proteines;
+        this.glucides = glucides;
+        this.sucre = sucre;
+        this.fibres = fibres;
+        this.sel = sel;
+        this.cholesterol = cholesterol;
+        this.provitamineA = provitamineA;
+        this.vitamineA = vitamineA;
+        this.vitamineB1 = vitamineB1;
+        this.vitamineB2 = vitamineB2;
+        this.vitamineB3 = vitamineB3;
+        this.vitamineB5 = vitamineB5;
+        this.vitamineB6 = vitamineB6;
+        this.vitamineB8 = vitamineB8;
+        this.vitamineB9 = vitamineB9;
+        this.vitamineB11 = vitamineB11;
+        this.vitamineB12 = vitamineB12;
+        this.vitamineC = vitamineC;
+        this.vitamineD = vitamineD;
+        this.vitamineE = vitamineE;
+        this.vitamineK1 = vitamineK1;
+        this.vitamineK2 = vitamineK2;
+        Ars = ars;
+        B = b;
+        Ca = ca;
+        Cl = cl;
+        this.choline = choline;
+        Cr = cr;
+        Co = co;
+        Cu = cu;
+        Fe = fe;
+        F = f;
+        I = i;
+        Mg = mg;
+        Mn = mn;
+        Mo = mo;
+        Na = na;
+        P = p;
+        K = k;
+        Rb = rb;
+        SiO = siO;
+        S = s;
+        Se = se;
+        V = v;
+        Sn = sn;
+        Zn = zn;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Aliment aliment)) return false;
 
-        Aliment aliment = (Aliment) o;
-
-        if (Double.compare(calories, aliment.calories) != 0) return false;
-        if (Double.compare(matieresGrasses, aliment.matieresGrasses) != 0) return false;
-        if (Double.compare(matieresGrassesSatures, aliment.matieresGrassesSatures) != 0) return false;
-        if (Double.compare(matieresGrassesMonoInsaturees, aliment.matieresGrassesMonoInsaturees) != 0)
+        if (Double.compare(getCalories(), aliment.getCalories()) != 0) return false;
+        if (Double.compare(getMatieresGrasses(), aliment.getMatieresGrasses()) != 0) return false;
+        if (Double.compare(getMatieresGrassesSatures(), aliment.getMatieresGrassesSatures()) != 0) return false;
+        if (Double.compare(getMatieresGrassesMonoInsaturees(), aliment.getMatieresGrassesMonoInsaturees()) != 0)
             return false;
-        if (Double.compare(matieresGrassesPolyInsaturees, aliment.matieresGrassesPolyInsaturees) != 0)
+        if (Double.compare(getMatieresGrassesPolyInsaturees(), aliment.getMatieresGrassesPolyInsaturees()) != 0)
             return false;
-        if (Double.compare(matieresGrassesTrans, aliment.matieresGrassesTrans) != 0) return false;
-        if (Double.compare(proteines, aliment.proteines) != 0) return false;
-        if (Double.compare(glucides, aliment.glucides) != 0) return false;
-        if (Double.compare(sucre, aliment.sucre) != 0) return false;
-        if (Double.compare(fibres, aliment.fibres) != 0) return false;
-        if (Double.compare(sel, aliment.sel) != 0) return false;
-        if (Double.compare(cholesterol, aliment.cholesterol) != 0) return false;
-        if (Double.compare(provitamineA, aliment.provitamineA) != 0) return false;
-        if (Double.compare(vitamineA, aliment.vitamineA) != 0) return false;
-        if (Double.compare(vitamineB1, aliment.vitamineB1) != 0) return false;
-        if (Double.compare(vitamineB2, aliment.vitamineB2) != 0) return false;
-        if (Double.compare(vitamineB3, aliment.vitamineB3) != 0) return false;
-        if (Double.compare(vitamineB5, aliment.vitamineB5) != 0) return false;
-        if (Double.compare(vitamineB6, aliment.vitamineB6) != 0) return false;
-        if (Double.compare(vitamineB8, aliment.vitamineB8) != 0) return false;
-        if (Double.compare(vitamineB9, aliment.vitamineB9) != 0) return false;
-        if (Double.compare(vitamineB11, aliment.vitamineB11) != 0) return false;
-        if (Double.compare(vitamineB12, aliment.vitamineB12) != 0) return false;
-        if (Double.compare(vitamineC, aliment.vitamineC) != 0) return false;
-        if (Double.compare(vitamineD, aliment.vitamineD) != 0) return false;
-        if (Double.compare(vitamineE, aliment.vitamineE) != 0) return false;
-        if (Double.compare(vitamineK, aliment.vitamineK) != 0) return false;
-        if (Double.compare(Ars, aliment.Ars) != 0) return false;
-        if (Double.compare(B, aliment.B) != 0) return false;
-        if (Double.compare(Ca, aliment.Ca) != 0) return false;
-        if (Double.compare(Cl, aliment.Cl) != 0) return false;
-        if (Double.compare(choline, aliment.choline) != 0) return false;
-        if (Double.compare(Cr, aliment.Cr) != 0) return false;
-        if (Double.compare(Co, aliment.Co) != 0) return false;
-        if (Double.compare(Cu, aliment.Cu) != 0) return false;
-        if (Double.compare(Fe, aliment.Fe) != 0) return false;
-        if (Double.compare(F, aliment.F) != 0) return false;
-        if (Double.compare(I, aliment.I) != 0) return false;
-        if (Double.compare(Mg, aliment.Mg) != 0) return false;
-        if (Double.compare(Mn, aliment.Mn) != 0) return false;
-        if (Double.compare(Mo, aliment.Mo) != 0) return false;
-        if (Double.compare(Na, aliment.Na) != 0) return false;
-        if (Double.compare(P, aliment.P) != 0) return false;
-        if (Double.compare(K, aliment.K) != 0) return false;
-        if (Double.compare(Rb, aliment.Rb) != 0) return false;
-        if (Double.compare(SiO, aliment.SiO) != 0) return false;
-        if (Double.compare(S, aliment.S) != 0) return false;
-        if (Double.compare(Se, aliment.Se) != 0) return false;
-        if (Double.compare(V, aliment.V) != 0) return false;
-        if (Double.compare(Sn, aliment.Sn) != 0) return false;
-        if (Double.compare(Zn, aliment.Zn) != 0) return false;
-        if (!nom.equals(aliment.nom)) return false;
-        return unite.equals(aliment.unite);
+        if (Double.compare(getMatieresGrassesTrans(), aliment.getMatieresGrassesTrans()) != 0) return false;
+        if (Double.compare(getProteines(), aliment.getProteines()) != 0) return false;
+        if (Double.compare(getGlucides(), aliment.getGlucides()) != 0) return false;
+        if (Double.compare(getSucre(), aliment.getSucre()) != 0) return false;
+        if (Double.compare(getFibres(), aliment.getFibres()) != 0) return false;
+        if (Double.compare(getSel(), aliment.getSel()) != 0) return false;
+        if (Double.compare(getCholesterol(), aliment.getCholesterol()) != 0) return false;
+        if (Double.compare(getProvitamineA(), aliment.getProvitamineA()) != 0) return false;
+        if (Double.compare(getVitamineA(), aliment.getVitamineA()) != 0) return false;
+        if (Double.compare(getVitamineB1(), aliment.getVitamineB1()) != 0) return false;
+        if (Double.compare(getVitamineB2(), aliment.getVitamineB2()) != 0) return false;
+        if (Double.compare(getVitamineB3(), aliment.getVitamineB3()) != 0) return false;
+        if (Double.compare(getVitamineB5(), aliment.getVitamineB5()) != 0) return false;
+        if (Double.compare(getVitamineB6(), aliment.getVitamineB6()) != 0) return false;
+        if (Double.compare(getVitamineB8(), aliment.getVitamineB8()) != 0) return false;
+        if (Double.compare(getVitamineB9(), aliment.getVitamineB9()) != 0) return false;
+        if (Double.compare(getVitamineB11(), aliment.getVitamineB11()) != 0) return false;
+        if (Double.compare(getVitamineB12(), aliment.getVitamineB12()) != 0) return false;
+        if (Double.compare(getVitamineC(), aliment.getVitamineC()) != 0) return false;
+        if (Double.compare(getVitamineD(), aliment.getVitamineD()) != 0) return false;
+        if (Double.compare(getVitamineE(), aliment.getVitamineE()) != 0) return false;
+        if (Double.compare(getVitamineK1(), aliment.getVitamineK1()) != 0) return false;
+        if (Double.compare(getVitamineK2(), aliment.getVitamineK2()) != 0) return false;
+        if (Double.compare(getArs(), aliment.getArs()) != 0) return false;
+        if (Double.compare(getB(), aliment.getB()) != 0) return false;
+        if (Double.compare(getCa(), aliment.getCa()) != 0) return false;
+        if (Double.compare(getCl(), aliment.getCl()) != 0) return false;
+        if (Double.compare(getCholine(), aliment.getCholine()) != 0) return false;
+        if (Double.compare(getCr(), aliment.getCr()) != 0) return false;
+        if (Double.compare(getCo(), aliment.getCo()) != 0) return false;
+        if (Double.compare(getCu(), aliment.getCu()) != 0) return false;
+        if (Double.compare(getFe(), aliment.getFe()) != 0) return false;
+        if (Double.compare(getF(), aliment.getF()) != 0) return false;
+        if (Double.compare(getI(), aliment.getI()) != 0) return false;
+        if (Double.compare(getMg(), aliment.getMg()) != 0) return false;
+        if (Double.compare(getMn(), aliment.getMn()) != 0) return false;
+        if (Double.compare(getMo(), aliment.getMo()) != 0) return false;
+        if (Double.compare(getNa(), aliment.getNa()) != 0) return false;
+        if (Double.compare(getP(), aliment.getP()) != 0) return false;
+        if (Double.compare(getK(), aliment.getK()) != 0) return false;
+        if (Double.compare(getRb(), aliment.getRb()) != 0) return false;
+        if (Double.compare(getSiO(), aliment.getSiO()) != 0) return false;
+        if (Double.compare(getS(), aliment.getS()) != 0) return false;
+        if (Double.compare(getSe(), aliment.getSe()) != 0) return false;
+        if (Double.compare(getV(), aliment.getV()) != 0) return false;
+        if (Double.compare(getSn(), aliment.getSn()) != 0) return false;
+        if (Double.compare(getZn(), aliment.getZn()) != 0) return false;
+        if (!getNom().equals(aliment.getNom())) return false;
+        return getUnite().equals(aliment.getUnite());
     }
 
     @Override
     public int hashCode() {
         int result;
         long temp;
-        result = nom.hashCode();
-        temp = Double.doubleToLongBits(calories);
+        result = getNom().hashCode();
+        temp = Double.doubleToLongBits(getCalories());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + unite.hashCode();
-        temp = Double.doubleToLongBits(matieresGrasses);
+        result = 31 * result + getUnite().hashCode();
+        temp = Double.doubleToLongBits(getMatieresGrasses());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(matieresGrassesSatures);
+        temp = Double.doubleToLongBits(getMatieresGrassesSatures());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(matieresGrassesMonoInsaturees);
+        temp = Double.doubleToLongBits(getMatieresGrassesMonoInsaturees());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(matieresGrassesPolyInsaturees);
+        temp = Double.doubleToLongBits(getMatieresGrassesPolyInsaturees());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(matieresGrassesTrans);
+        temp = Double.doubleToLongBits(getMatieresGrassesTrans());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(proteines);
+        temp = Double.doubleToLongBits(getProteines());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(glucides);
+        temp = Double.doubleToLongBits(getGlucides());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(sucre);
+        temp = Double.doubleToLongBits(getSucre());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(fibres);
+        temp = Double.doubleToLongBits(getFibres());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(sel);
+        temp = Double.doubleToLongBits(getSel());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(cholesterol);
+        temp = Double.doubleToLongBits(getCholesterol());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(provitamineA);
+        temp = Double.doubleToLongBits(getProvitamineA());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineA);
+        temp = Double.doubleToLongBits(getVitamineA());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB1);
+        temp = Double.doubleToLongBits(getVitamineB1());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB2);
+        temp = Double.doubleToLongBits(getVitamineB2());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB3);
+        temp = Double.doubleToLongBits(getVitamineB3());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB5);
+        temp = Double.doubleToLongBits(getVitamineB5());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB6);
+        temp = Double.doubleToLongBits(getVitamineB6());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB8);
+        temp = Double.doubleToLongBits(getVitamineB8());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB9);
+        temp = Double.doubleToLongBits(getVitamineB9());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB11);
+        temp = Double.doubleToLongBits(getVitamineB11());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineB12);
+        temp = Double.doubleToLongBits(getVitamineB12());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineC);
+        temp = Double.doubleToLongBits(getVitamineC());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineD);
+        temp = Double.doubleToLongBits(getVitamineD());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineE);
+        temp = Double.doubleToLongBits(getVitamineE());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(vitamineK);
+        temp = Double.doubleToLongBits(getVitamineK1());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Ars);
+        temp = Double.doubleToLongBits(getVitamineK2());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(B);
+        temp = Double.doubleToLongBits(getArs());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Ca);
+        temp = Double.doubleToLongBits(getB());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Cl);
+        temp = Double.doubleToLongBits(getCa());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(choline);
+        temp = Double.doubleToLongBits(getCl());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Cr);
+        temp = Double.doubleToLongBits(getCholine());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Co);
+        temp = Double.doubleToLongBits(getCr());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Cu);
+        temp = Double.doubleToLongBits(getCo());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Fe);
+        temp = Double.doubleToLongBits(getCu());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(F);
+        temp = Double.doubleToLongBits(getFe());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(I);
+        temp = Double.doubleToLongBits(getF());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Mg);
+        temp = Double.doubleToLongBits(getI());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Mn);
+        temp = Double.doubleToLongBits(getMg());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Mo);
+        temp = Double.doubleToLongBits(getMn());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Na);
+        temp = Double.doubleToLongBits(getMo());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(P);
+        temp = Double.doubleToLongBits(getNa());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(K);
+        temp = Double.doubleToLongBits(getP());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Rb);
+        temp = Double.doubleToLongBits(getK());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(SiO);
+        temp = Double.doubleToLongBits(getRb());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(S);
+        temp = Double.doubleToLongBits(getSiO());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Se);
+        temp = Double.doubleToLongBits(getS());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(V);
+        temp = Double.doubleToLongBits(getSe());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Sn);
+        temp = Double.doubleToLongBits(getV());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(Zn);
+        temp = Double.doubleToLongBits(getSn());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(getZn());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
@@ -327,7 +391,8 @@ public class Aliment {
     @Override
     public String toString() {
         return "Aliment{" +
-                "nom='" + nom + '\'' +
+                "id=" + id +
+                ", nom='" + nom + '\'' +
                 ", calories=" + calories +
                 ", unite='" + unite + '\'' +
                 ", matieresGrasses=" + matieresGrasses +
@@ -355,7 +420,8 @@ public class Aliment {
                 ", vitamineC=" + vitamineC +
                 ", vitamineD=" + vitamineD +
                 ", vitamineE=" + vitamineE +
-                ", vitamineK=" + vitamineK +
+                ", vitamineK1=" + vitamineK1 +
+                ", vitamineK2=" + vitamineK2 +
                 ", Ars=" + Ars +
                 ", B=" + B +
                 ", Ca=" + Ca +

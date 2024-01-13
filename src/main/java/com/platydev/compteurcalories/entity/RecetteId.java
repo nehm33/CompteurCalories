@@ -14,9 +14,9 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class RecetteId implements Serializable {
 
-    @Column(name = "nom_plat")
-    private String nomPlat;
+    @Column(name = "plat_id")
+    private long platId;
 
-    @Column(name = "nom_aliment")
-    private String nomAliment;
+    @Column(name = "aliment_id")
+    private long alimentId;
 }

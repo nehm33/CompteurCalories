@@ -11,25 +11,25 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
 public class Recette {
 
     @EmbeddedId
     private RecetteId recetteId;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @MapsId("nomPlat")
-    @JoinColumn(name = "nom_plat")
+    @MapsId("platId")
+    @JoinColumn(name = "plat_id")
     private Plat plat;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @MapsId("nomAliment")
-    @JoinColumn(name = "nom_aliment")
+    @MapsId("alimentId")
+    @JoinColumn(name = "aliment_id")
     private Aliment aliment;
 
     private double quantite;
 
     public Recette(Plat plat, Aliment aliment, double quantite) {
+        this.recetteId = new RecetteId(plat.getId(), aliment.getId());
         this.plat = plat;
         this.aliment = aliment;
         this.quantite = quantite;
@@ -38,22 +38,22 @@ public class Recette {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Recette recette)) return false;
 
-        Recette recette = (Recette) o;
-
-        if (Double.compare(quantite, recette.quantite) != 0) return false;
-        if (!plat.equals(recette.plat)) return false;
-        return aliment.equals(recette.aliment);
+        if (Double.compare(getQuantite(), recette.getQuantite()) != 0) return false;
+        if (!getRecetteId().equals(recette.getRecetteId())) return false;
+        if (!getPlat().equals(recette.getPlat())) return false;
+        return getAliment().equals(recette.getAliment());
     }
 
     @Override
     public int hashCode() {
         int result;
         long temp;
-        result = plat.hashCode();
-        result = 31 * result + aliment.hashCode();
-        temp = Double.doubleToLongBits(quantite);
+        result = getRecetteId().hashCode();
+        result = 31 * result + getPlat().hashCode();
+        result = 31 * result + getAliment().hashCode();
+        temp = Double.doubleToLongBits(getQuantite());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }

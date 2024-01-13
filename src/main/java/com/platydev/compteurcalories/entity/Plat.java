@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "plats")
@@ -16,6 +17,9 @@ import java.util.List;
 public class Plat {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     private String nom;
 
     @Column(name = "portions")
@@ -27,23 +31,26 @@ public class Plat {
     @OneToMany(mappedBy = "plat", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     private List<JournalPlat> journalPlatList;
 
+    public Plat(String nom, double nbPortions) {
+        this.nom = nom;
+        this.nbPortions = nbPortions;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Plat plat)) return false;
 
-        Plat plat = (Plat) o;
-
-        if (Double.compare(nbPortions, plat.nbPortions) != 0) return false;
-        return nom.equals(plat.nom);
+        if (Double.compare(getNbPortions(), plat.getNbPortions()) != 0) return false;
+        return getNom().equals(plat.getNom());
     }
 
     @Override
     public int hashCode() {
         int result;
         long temp;
-        result = nom.hashCode();
-        temp = Double.doubleToLongBits(nbPortions);
+        result = getNom().hashCode();
+        temp = Double.doubleToLongBits(getNbPortions());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
@@ -51,7 +58,8 @@ public class Plat {
     @Override
     public String toString() {
         return "Plat{" +
-                "nom='" + nom + '\'' +
+                "id=" + id +
+                ", nom='" + nom + '\'' +
                 ", nbPortions=" + nbPortions +
                 '}';
     }
