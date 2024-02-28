@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Embeddable
 @NoArgsConstructor
@@ -22,5 +22,5 @@ public class JournalAlimentId implements Serializable {
 
     @Basic
     @Column(name = "date_journal")
-    private Date date;
+    private LocalDate date;
 }

@@ -11,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +34,7 @@ public class JournalPlatRepositoryTest {
         Plat pateTomate = new Plat("pâte tomate", 2);
         pommeTerreSautees.setId(1);
         pateTomate.setId(2);
-        Date date = Date.valueOf("2023-12-22");
+        LocalDate date = LocalDate.of(2023,12,22);
 
         JournalPlat journalPlat1 = new JournalPlat(date, pommeTerreSautees, 1);
         JournalPlat journalPlat2 = new JournalPlat(date, pateTomate, 1);
@@ -51,7 +51,7 @@ public class JournalPlatRepositoryTest {
     public void testFindBy() {
         Plat pommeTerreSautees = new Plat("pommes de terre sautées", 1);
         pommeTerreSautees.setId(1);
-        Date date = Date.valueOf("2023-12-22");
+        LocalDate date = LocalDate.of(2023,12,22);
 
         JournalPlat journalPlat = new JournalPlat(date, pommeTerreSautees, 1);
 
@@ -64,7 +64,7 @@ public class JournalPlatRepositoryTest {
     public void testCreate() {
         Plat pouletGrille = new Plat("poulet grillé", 1);
         pouletGrille.setId(3);
-        Date date = Date.valueOf("2023-12-22");
+        LocalDate date = LocalDate.of(2023,12,22);
 
         JournalPlat journalPlat = new JournalPlat(date, pouletGrille, 1);
 
@@ -79,7 +79,7 @@ public class JournalPlatRepositoryTest {
     public void testUpdate() {
         Plat pommeTerreSautees = new Plat("pommes de terre sautées", 1);
         pommeTerreSautees.setId(1);
-        Date date = Date.valueOf("2023-12-22");
+        LocalDate date = LocalDate.of(2023,12,22);
 
         JournalPlat journalPlat = new JournalPlat(date, pommeTerreSautees, 1);
 
@@ -100,7 +100,7 @@ public class JournalPlatRepositoryTest {
     public void testDelete() {
         Plat pommeTerreSautees = new Plat("pommes de terre sautées", 1);
         pommeTerreSautees.setId(1);
-        Date date = Date.valueOf("2023-12-22");
+        LocalDate date = LocalDate.of(2023,12,22);
 
         JournalPlat journalPlat1 = new JournalPlat(date, pommeTerreSautees, 1);
 

@@ -1,9 +1,12 @@
 package com.platydev.compteurcalories.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "composition_journal_plat")
@@ -23,7 +26,7 @@ public class JournalPlat {
 
     private double portions;
 
-    public JournalPlat(Date date, Plat plat, double portions) {
+    public JournalPlat(LocalDate date, Plat plat, double portions) {
         this.journalPlatId = new JournalPlatId(plat.getId(), date);
         this.plat = plat;
         this.portions = portions;
