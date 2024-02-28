@@ -1,6 +1,9 @@
 package com.platydev.compteurcalories.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,9 +23,12 @@ public class Plat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotBlank
+    @Size(max = 100)
     private String nom;
 
     @Column(name = "portions")
+    @Positive
     private double nbPortions;
 
     @OneToMany(mappedBy = "plat", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})

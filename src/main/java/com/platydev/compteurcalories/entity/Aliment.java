@@ -1,10 +1,17 @@
 package com.platydev.compteurcalories.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "aliments")
@@ -17,133 +24,189 @@ public class Aliment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotBlank
+    @Size(max = 100)
     private String nom;
 
+    @Positive
     private double calories;
 
+    @NotBlank
+    @Size(max = 2)
     private String unite;
 
     @Column(name = "Mat_Gras")
+    @PositiveOrZero
     private double matieresGrasses;
 
     @Column(name = "Mat_Gras_S")
+    @PositiveOrZero
     private double matieresGrassesSatures;
 
     @Column(name = "Mat_Gras_MI")
+    @PositiveOrZero
     private double matieresGrassesMonoInsaturees;
 
     @Column(name = "Mat_Gras_PI")
+    @PositiveOrZero
     private double matieresGrassesPolyInsaturees;
 
     @Column(name = "Mat_Gras_T")
+    @PositiveOrZero
     private double matieresGrassesTrans;
 
+    @PositiveOrZero
     private double proteines;
 
+    @PositiveOrZero
     private double glucides;
 
+    @PositiveOrZero
     private double sucre;
 
+    @PositiveOrZero
     private double fibres;
 
+    @PositiveOrZero
     private double sel;
 
+    @PositiveOrZero
     private double cholesterol;
 
     @Column(name = "pro_vit_A")
+    @PositiveOrZero
     private double provitamineA;
 
     @Column(name = "vit_A")
+    @PositiveOrZero
     private double vitamineA;
 
     @Column(name = "vit_B1")
+    @PositiveOrZero
     private double vitamineB1;
 
     @Column(name = "vit_B2")
+    @PositiveOrZero
     private double vitamineB2;
 
     @Column(name = "vit_B3")
+    @PositiveOrZero
     private double vitamineB3;
 
     @Column(name = "vit_B5")
+    @PositiveOrZero
     private double vitamineB5;
 
     @Column(name = "vit_B6")
+    @PositiveOrZero
     private double vitamineB6;
 
     @Column(name = "vit_B8")
+    @PositiveOrZero
     private double vitamineB8;
 
     @Column(name = "vit_B9")
+    @PositiveOrZero
     private double vitamineB9;
 
     @Column(name = "vit_B11")
+    @PositiveOrZero
     private double vitamineB11;
 
     @Column(name = "vit_B12")
+    @PositiveOrZero
     private double vitamineB12;
 
     @Column(name = "vit_C")
+    @PositiveOrZero
     private double vitamineC;
 
     @Column(name = "vit_D")
+    @PositiveOrZero
     private double vitamineD;
 
     @Column(name = "vit_E")
+    @PositiveOrZero
     private double vitamineE;
 
     @Column(name = "vit_K1")
+    @PositiveOrZero
     private double vitamineK1;
 
     @Column(name = "vit_K2")
+    @PositiveOrZero
     private double vitamineK2;
 
+    @PositiveOrZero
     private double Ars;
 
+    @PositiveOrZero
     private double B;
 
+    @PositiveOrZero
     private double Ca;
 
+    @PositiveOrZero
     private double Cl;
 
+    @PositiveOrZero
     private double choline;
 
+    @PositiveOrZero
     private double Cr;
 
+    @PositiveOrZero
     private double Co;
 
+    @PositiveOrZero
     private double Cu;
 
+    @PositiveOrZero
     private double Fe;
 
+    @PositiveOrZero
     private double F;
 
+    @PositiveOrZero
     private double I;
 
+    @PositiveOrZero
     private double Mg;
 
+    @PositiveOrZero
     private double Mn;
 
+    @PositiveOrZero
     private double Mo;
 
+    @PositiveOrZero
     private double Na;
 
+    @PositiveOrZero
     private double P;
 
+    @PositiveOrZero
     private double K;
 
+    @PositiveOrZero
     private double Rb;
 
+    @PositiveOrZero
     private double SiO;
 
+    @PositiveOrZero
     private double S;
 
+    @PositiveOrZero
     private double Se;
 
+    @PositiveOrZero
     private double V;
 
+    @PositiveOrZero
     private double Sn;
 
+    @PositiveOrZero
     private double Zn;
 
     @OneToOne(mappedBy = "aliment", cascade = CascadeType.ALL)

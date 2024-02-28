@@ -1,6 +1,8 @@
 package com.platydev.compteurcalories.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.Objects;
@@ -15,8 +17,12 @@ public class CodeBarre {
 
     @Id
     @Column(name = "code_barre")
+    @NotBlank
+    @Size(min = 13, max = 13)
     private String codeBarre;
 
+    @NotBlank
+    @Size(max = 30)
     private String marque;
 
     @OneToOne(fetch = FetchType.LAZY)
