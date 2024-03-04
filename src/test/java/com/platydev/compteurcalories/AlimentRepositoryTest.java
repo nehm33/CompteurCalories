@@ -126,4 +126,18 @@ public class AlimentRepositoryTest {
         assertFalse(codeBarreList.isEmpty());
         assertEquals(2, codeBarreList.size());
     }
+
+    @Test
+    public void testFindByNomLike() {
+        Aliment tomate = new Aliment("tomate", 19.3, "g", 0.26, 0, 0, 0, 0, 0.86, 2.5, 0, 1.2, 0, 0, 449, 0, 0.039, 0.019, 0.65, 0.21, 0.082, 0, 22.7, 0, 0, 15.5, 0, 0.66, 7.9, 0, 0, 0, 8.14, 51, 0, 0, 0, 0.029, 0.12, 0, 0.2, 10.1, 0.066, 0, 3.22, 26.6, 256, 0, 0, 0, 10, 0, 0, 0.087);
+        Aliment pommeDeTerre = new Aliment("pomme de terre", 93.2, "g", 1.37, 0, 0, 0, 0, 2.01, 17.2, 1.05, 1.96, 0, 0, 3.68, 0, 0.07, 0.013, 1.08, 0.46, 0.24, 0, 18.4, 0, 0.03, 5.05, 0, 0.12, 1.34, 0,0, 0, 9.62, 150, 0, 0, 0, 0.095, 0.43, 0, 6.78, 20.7, 0.12, 0, 48.8, 43.7, 450, 0, 0, 0, 7.07, 0, 0, 0.24);
+
+        List<Aliment> alimentList = alimentRepository.findByNomLike("%om%");
+
+        assertNotNull(alimentList);
+        assertFalse(alimentList.isEmpty());
+        assertEquals(2, alimentList.size());
+        assertThat(alimentList).contains(tomate, pommeDeTerre);
+
+    }
 }

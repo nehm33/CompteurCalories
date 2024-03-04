@@ -25,7 +25,7 @@ public class CodeBarre {
     @Size(max = 30)
     private String marque;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "aliment_id")
     private Aliment aliment;
 

@@ -94,4 +94,18 @@ public class PlatRepositoryTest {
         assertEquals(3, platList.size());
         assertThat(platList).contains(pommeTerreSautees, pateTomate, pouletGrille);
     }
+
+    @Test
+    public void testFindByNomLike() {
+        Plat pommeTerreSautees = new Plat("pommes de terre sautées", 1);
+        Plat pateTomate = new Plat("pâte tomate", 2);
+        Plat pommeTerreSautees2 = new Plat("pommes de terre sautées 2", 1);
+
+        List<Plat> platList = platRepository.findByNomLike("%om%");
+
+        assertNotNull(platList);
+        assertFalse(platList.isEmpty());
+        assertEquals(3, platList.size());
+        assertThat(platList).contains(pommeTerreSautees, pateTomate, pommeTerreSautees2);
+    }
 }

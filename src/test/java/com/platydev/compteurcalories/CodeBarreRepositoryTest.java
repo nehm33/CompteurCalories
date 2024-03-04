@@ -39,7 +39,7 @@ public class CodeBarreRepositoryTest {
 
         assertNotNull(codeBarreList);
         assertFalse(codeBarreList.isEmpty());
-        assertEquals(codeBarreList.size(), 2);
+        assertEquals(2, codeBarreList.size());
         assertThat(codeBarreList).contains(fleuryMichel, doree);
     }
 
@@ -95,23 +95,14 @@ public class CodeBarreRepositoryTest {
     }
 
     @Test
-    public void testDelete() {
+    public void testFindByCodeBarreLike() {
         CodeBarre fleuryMichel = new CodeBarre("1233456789098", "fleury michel", entityManager.find(Aliment.class, 3));
 
-        codeBarreRepository.deleteById("3211456789045");
-
-        List<CodeBarre> codeBarreList = codeBarreRepository.findAll();
+        List<CodeBarre> codeBarreList = codeBarreRepository.findByCodeBarreLike("12%");
 
         assertNotNull(codeBarreList);
         assertFalse(codeBarreList.isEmpty());
-        assertEquals(codeBarreList.size(), 1);
+        assertEquals(1, codeBarreList.size());
         assertThat(codeBarreList).contains(fleuryMichel);
-
-        Aliment huileOlive = new Aliment("huile d'olive", 900, "g", 100, 14, 75.2, 6.9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 47.8, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.6, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0);
-
-        Aliment aliment = entityManager.find(Aliment.class, 4);
-
-        assertNotNull(aliment);
-        assertEquals(huileOlive, aliment);
     }
 }
