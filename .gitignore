@@ -11,6 +11,9 @@ CompteurCalories.iml
 build/
 bin/
 
+# Spring Boot help
+HELP.md
+ 
 # Compiled class file
 *.class
 

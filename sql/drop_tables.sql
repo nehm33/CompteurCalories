@@ -1,7 +1,9 @@
-DROP TABLE users;
-DROP TABLE aliments;
-DROP TABLE plats;
-DROP TABLE recettes;
-DROP TABLE composition_journal_aliment;
-DROP TABLE composition_journal_plat;
-DROP TABLE codeBarre;
+DROP TABLE IF EXISTS code_barre;
+DROP TABLE IF EXISTS recettes;
+DROP TABLE IF EXISTS composition_journal_aliment;
+DROP TABLE IF EXISTS aliment_plat;
+DROP TABLE IF EXISTS aliments;
+DROP TABLE IF EXISTS plats;
+DROP TABLE IF EXISTS utilisateur_role;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS utilisateurs;
