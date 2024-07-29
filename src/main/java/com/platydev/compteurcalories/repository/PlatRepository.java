@@ -9,5 +9,4 @@ import java.util.List;
 @Repository
 public interface PlatRepository extends JpaRepository<Plat, Long> {
 
-    List<Plat> findByNomLike(String pattern);
 }

@@ -11,14 +11,14 @@ import java.time.LocalDate;
 @Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
-@ToString
+@Data
 public class JournalAlimentId implements Serializable {
 
     @Column(name = "aliment_id")
     private long alimentId;
+
+    @Column(name = "user_id")
+    private long userId;
 
     @Basic
     @Column(name = "date_journal")

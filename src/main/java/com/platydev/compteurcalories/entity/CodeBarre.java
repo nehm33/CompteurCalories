@@ -5,14 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.Objects;
-
 @Entity
 @Table(name = "code_barre")
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
 public class CodeBarre {
 
     @Id
@@ -25,7 +22,7 @@ public class CodeBarre {
     @Size(max = 30)
     private String marque;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "aliment_id")
     private Aliment aliment;
 
@@ -36,14 +33,14 @@ public class CodeBarre {
 
         if (!getCodeBarre().equals(codeBarre1.getCodeBarre())) return false;
         if (!getMarque().equals(codeBarre1.getMarque())) return false;
-        return getAliment().equals(codeBarre1.getAliment());
+        return getAliment().getId() == codeBarre1.getAliment().getId();
     }
 
     @Override
     public int hashCode() {
         int result = getCodeBarre().hashCode();
         result = 31 * result + getMarque().hashCode();
-        result = 31 * result + getAliment().hashCode();
+        result = 31 * result + (int) getAliment().getId();
         return result;
     }
 

@@ -1,10 +1,8 @@
 package com.platydev.compteurcalories.entity;
 
+import com.platydev.compteurcalories.entity.security.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -12,53 +10,32 @@ import java.time.LocalDate;
 @Table(name = "composition_journal_aliment")
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
 public class JournalAliment {
 
     @EmbeddedId
     private JournalAlimentId journalAlimentId;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne
     @MapsId("alimentId")
     @JoinColumn(name = "aliment_id")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Aliment aliment;
 
-    private double quantite;
+    @ManyToOne
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private User user;
 
-    public JournalAliment(LocalDate date, Aliment aliment, double quantite) {
-        this.journalAlimentId = new JournalAlimentId(aliment.getId(), date);
+    private float quantite;
+
+    public JournalAliment(LocalDate date, Aliment aliment, User user, float quantite) {
+        this.journalAlimentId = new JournalAlimentId(aliment.getId(), user.getId(), date);
         this.aliment = aliment;
+        this.user = user;
         this.quantite = quantite;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JournalAliment that)) return false;
-
-        if (Double.compare(getQuantite(), that.getQuantite()) != 0) return false;
-        if (!getJournalAlimentId().equals(that.getJournalAlimentId())) return false;
-        return getAliment().equals(that.getAliment());
-    }
-
-    @Override
-    public int hashCode() {
-        int result;
-        long temp;
-        result = getJournalAlimentId().hashCode();
-        result = 31 * result + getAliment().hashCode();
-        temp = Double.doubleToLongBits(getQuantite());
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "JournalAliment{" +
-                "journalAlimentId=" + journalAlimentId +
-                ", aliment=" + aliment +
-                ", quantite=" + quantite +
-                '}';
     }
 }
