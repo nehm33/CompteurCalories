@@ -11,4 +11,5 @@ import java.util.List;
 public interface AlimentRepository extends JpaRepository<Aliment, Long> {
 
     List<Aliment> findByNomLike(String pattern);
+
 }
