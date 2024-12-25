@@ -2,13 +2,13 @@ CREATE DATABASE compteur_calories;
 
 CREATE TABLE utilisateurs (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  nom VARCHAR(50) UNIQUE NOT NULL,
+  username VARCHAR(50) UNIQUE NOT NULL,
   password VARCHAR(68) NOT NULL
 );
 
 CREATE TABLE roles (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  nom ENUM('role_user','role_admin') NOT NULL
+  name ENUM('role_user','role_admin') NOT NULL
 );
 
 CREATE TABLE utilisateur_role (
