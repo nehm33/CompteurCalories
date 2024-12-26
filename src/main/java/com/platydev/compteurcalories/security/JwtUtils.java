@@ -7,6 +7,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ public class JwtUtils {
     @Value("${app.security.jwtSecret}")
     private String jwtSecret;
 
+    @Getter
     @Value("${app.security.jwtExpiration}")
     private int jwtExpiration;
 
@@ -41,6 +43,7 @@ public class JwtUtils {
         String username = userDetails.getUsername();
         return Jwts.builder()
                 .subject(username)
+                .issuer("CompteurCaloriesAPI")
                 .issuedAt(new Date())
                 .expiration(new Date(new Date().getTime() + jwtExpiration*1000L))
                 .signWith(key())

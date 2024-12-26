@@ -1,4 +1,4 @@
-CREATE DATABASE compteur_calories;
+#CREATE DATABASE compteur_calories;
 
 CREATE TABLE utilisateurs (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -8,7 +8,7 @@ CREATE TABLE utilisateurs (
 
 CREATE TABLE roles (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  name ENUM('role_user','role_admin') NOT NULL
+  name ENUM('ROLE_USER','ROLE_ADMIN') NOT NULL
 );
 
 CREATE TABLE utilisateur_role (
