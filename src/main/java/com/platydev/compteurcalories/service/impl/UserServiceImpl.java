@@ -1,8 +1,8 @@
 package com.platydev.compteurcalories.service.impl;
 
-import com.platydev.compteurcalories.dto.input.LoginInputDTO;
-import com.platydev.compteurcalories.dto.input.SigninInputDTO;
-import com.platydev.compteurcalories.dto.output.LoginOutputDTO;
+import com.platydev.compteurcalories.dto.input.LoginInput;
+import com.platydev.compteurcalories.dto.input.SigninInput;
+import com.platydev.compteurcalories.dto.output.LoginOutput;
 import com.platydev.compteurcalories.entity.security.User;
 import com.platydev.compteurcalories.infrastructure.UserMapper;
 import com.platydev.compteurcalories.repository.security.UserRepository;
@@ -35,17 +35,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LoginOutputDTO authenticate(LoginInputDTO loginInputDTO) {
-        User user = userRepository.findByUsernameAndPassword(loginInputDTO.username(), loginInputDTO.password())
+    public LoginOutput authenticate(LoginInput loginInput) {
+        User user = userRepository.findByUsernameAndPassword(loginInput.username(), loginInput.password())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         String token = jwtUtils.generateTokenFromUsername(user);
-        return new LoginOutputDTO(token, jwtUtils.getJwtExpiration());
+        return new LoginOutput(token, jwtUtils.getJwtExpiration());
     }
 
     @Override
-    public void add(SigninInputDTO signinInputDTO) {
-        User user = userMapper.toUser(signinInputDTO);
+    public void add(SigninInput signinInput) {
+        User user = userMapper.toUser(signinInput);
         userRepository.save(user);
     }
 }
