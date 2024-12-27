@@ -29,6 +29,8 @@ public class SecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/**").hasRole("USER")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 //        http.formLogin(Customizer.withDefaults());

@@ -6,10 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
@@ -17,18 +14,20 @@ import java.util.List;
 @Table(name = "aliments")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Aliment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @NotBlank
     @Size(max = 100)
     private String nom;
 
     @Positive
-    private float calories;
+    private Float calories;
 
     @NotBlank
     @Size(max = 2)
@@ -36,177 +35,177 @@ public class Aliment {
 
     @Column(name = "Mat_Gras")
     @PositiveOrZero
-    private float matieresGrasses;
+    private Float matieresGrasses;
 
     @Column(name = "Mat_Gras_S")
     @PositiveOrZero
-    private float matieresGrassesSatures;
+    private Float matieresGrassesSatures;
 
     @Column(name = "Mat_Gras_MI")
     @PositiveOrZero
-    private float matieresGrassesMonoInsaturees;
+    private Float matieresGrassesMonoInsaturees;
 
     @Column(name = "Mat_Gras_PI")
     @PositiveOrZero
-    private float matieresGrassesPolyInsaturees;
+    private Float matieresGrassesPolyInsaturees;
 
     @Column(name = "Mat_Gras_T")
     @PositiveOrZero
-    private float matieresGrassesTrans;
+    private Float matieresGrassesTrans;
 
     @PositiveOrZero
-    private float proteines;
+    private Float proteines;
 
     @PositiveOrZero
-    private float glucides;
+    private Float glucides;
 
     @PositiveOrZero
-    private float sucre;
+    private Float sucre;
 
     @PositiveOrZero
-    private float fibres;
+    private Float fibres;
 
     @PositiveOrZero
-    private float sel;
+    private Float sel;
 
     @PositiveOrZero
-    private float cholesterol;
+    private Float cholesterol;
 
     @Column(name = "pro_vit_A")
     @PositiveOrZero
-    private float provitamineA;
+    private Float provitamineA;
 
     @Column(name = "vit_A")
     @PositiveOrZero
-    private float vitamineA;
+    private Float vitamineA;
 
     @Column(name = "vit_B1")
     @PositiveOrZero
-    private float vitamineB1;
+    private Float vitamineB1;
 
     @Column(name = "vit_B2")
     @PositiveOrZero
-    private float vitamineB2;
+    private Float vitamineB2;
 
     @Column(name = "vit_B3")
     @PositiveOrZero
-    private float vitamineB3;
+    private Float vitamineB3;
 
     @Column(name = "vit_B5")
     @PositiveOrZero
-    private float vitamineB5;
+    private Float vitamineB5;
 
     @Column(name = "vit_B6")
     @PositiveOrZero
-    private float vitamineB6;
+    private Float vitamineB6;
 
     @Column(name = "vit_B8")
     @PositiveOrZero
-    private float vitamineB8;
+    private Float vitamineB8;
 
     @Column(name = "vit_B9")
     @PositiveOrZero
-    private float vitamineB9;
+    private Float vitamineB9;
 
     @Column(name = "vit_B11")
     @PositiveOrZero
-    private float vitamineB11;
+    private Float vitamineB11;
 
     @Column(name = "vit_B12")
     @PositiveOrZero
-    private float vitamineB12;
+    private Float vitamineB12;
 
     @Column(name = "vit_C")
     @PositiveOrZero
-    private float vitamineC;
+    private Float vitamineC;
 
     @Column(name = "vit_D")
     @PositiveOrZero
-    private float vitamineD;
+    private Float vitamineD;
 
     @Column(name = "vit_E")
     @PositiveOrZero
-    private float vitamineE;
+    private Float vitamineE;
 
     @Column(name = "vit_K1")
     @PositiveOrZero
-    private float vitamineK1;
+    private Float vitamineK1;
 
     @Column(name = "vit_K2")
     @PositiveOrZero
-    private float vitamineK2;
+    private Float vitamineK2;
 
     @PositiveOrZero
-    private float Ars;
+    private Float Ars;
 
     @PositiveOrZero
-    private float B;
+    private Float B;
 
     @PositiveOrZero
-    private float Ca;
+    private Float Ca;
 
     @PositiveOrZero
-    private float Cl;
+    private Float Cl;
 
     @PositiveOrZero
-    private float choline;
+    private Float choline;
 
     @PositiveOrZero
-    private float Cr;
+    private Float Cr;
 
     @PositiveOrZero
-    private float Co;
+    private Float Co;
 
     @PositiveOrZero
-    private float Cu;
+    private Float Cu;
 
     @PositiveOrZero
-    private float Fe;
+    private Float Fe;
 
     @PositiveOrZero
-    private float F;
+    private Float F;
 
     @PositiveOrZero
-    private float I;
+    private Float I;
 
     @PositiveOrZero
-    private float Mg;
+    private Float Mg;
 
     @PositiveOrZero
-    private float Mn;
+    private Float Mn;
 
     @PositiveOrZero
-    private float Mo;
+    private Float Mo;
 
     @PositiveOrZero
-    private float Na;
+    private Float Na;
 
     @PositiveOrZero
-    private float P;
+    private Float P;
 
     @PositiveOrZero
-    private float K;
+    private Float K;
 
     @PositiveOrZero
-    private float Rb;
+    private Float Rb;
 
     @PositiveOrZero
-    private float SiO;
+    private Float SiO;
 
     @PositiveOrZero
-    private float S;
+    private Float S;
 
     @PositiveOrZero
-    private float Se;
+    private Float Se;
 
     @PositiveOrZero
-    private float V;
+    private Float V;
 
     @PositiveOrZero
-    private float Sn;
+    private Float Sn;
 
     @PositiveOrZero
-    private float Zn;
+    private Float Zn;
 
     @OneToOne(mappedBy = "aliment", cascade = CascadeType.ALL)
     @EqualsAndHashCode.Exclude
@@ -232,61 +231,4 @@ public class Aliment {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private List<JournalAliment> journalAlimentList;
-
-    public Aliment(String nom, float calories, String unite, float matieresGrasses, float matieresGrassesSatures, float matieresGrassesMonoInsaturees, float matieresGrassesPolyInsaturees, float matieresGrassesTrans, float proteines, float glucides, float sucre, float fibres, float sel, float cholesterol, float provitamineA, float vitamineA, float vitamineB1, float vitamineB2, float vitamineB3, float vitamineB5, float vitamineB6, float vitamineB8, float vitamineB9, float vitamineB11, float vitamineB12, float vitamineC, float vitamineD, float vitamineE, float vitamineK1, float vitamineK2, float ars, float b, float ca, float cl, float choline, float cr, float co, float cu, float fe, float f, float i, float mg, float mn, float mo, float na, float p, float k, float rb, float siO, float s, float se, float v, float sn, float zn) {
-        this.nom = nom;
-        this.calories = calories;
-        this.unite = unite;
-        this.matieresGrasses = matieresGrasses;
-        this.matieresGrassesSatures = matieresGrassesSatures;
-        this.matieresGrassesMonoInsaturees = matieresGrassesMonoInsaturees;
-        this.matieresGrassesPolyInsaturees = matieresGrassesPolyInsaturees;
-        this.matieresGrassesTrans = matieresGrassesTrans;
-        this.proteines = proteines;
-        this.glucides = glucides;
-        this.sucre = sucre;
-        this.fibres = fibres;
-        this.sel = sel;
-        this.cholesterol = cholesterol;
-        this.provitamineA = provitamineA;
-        this.vitamineA = vitamineA;
-        this.vitamineB1 = vitamineB1;
-        this.vitamineB2 = vitamineB2;
-        this.vitamineB3 = vitamineB3;
-        this.vitamineB5 = vitamineB5;
-        this.vitamineB6 = vitamineB6;
-        this.vitamineB8 = vitamineB8;
-        this.vitamineB9 = vitamineB9;
-        this.vitamineB11 = vitamineB11;
-        this.vitamineB12 = vitamineB12;
-        this.vitamineC = vitamineC;
-        this.vitamineD = vitamineD;
-        this.vitamineE = vitamineE;
-        this.vitamineK1 = vitamineK1;
-        this.vitamineK2 = vitamineK2;
-        Ars = ars;
-        B = b;
-        Ca = ca;
-        Cl = cl;
-        this.choline = choline;
-        Cr = cr;
-        Co = co;
-        Cu = cu;
-        Fe = fe;
-        F = f;
-        I = i;
-        Mg = mg;
-        Mn = mn;
-        Mo = mo;
-        Na = na;
-        P = p;
-        K = k;
-        Rb = rb;
-        SiO = siO;
-        S = s;
-        Se = se;
-        V = v;
-        Sn = sn;
-        Zn = zn;
-    }
 }

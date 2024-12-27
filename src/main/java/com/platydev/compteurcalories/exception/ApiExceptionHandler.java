@@ -30,16 +30,23 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ApiError> usernameNotFoundException(UsernameNotFoundException e) {
+    public ResponseEntity<ApiError> unauthorizedHandler(UsernameNotFoundException e) {
         LOGGER.warn("Catching exception : ", e);
         ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED.value(), e.getClass().getName(), e.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiError> runtimeException(RuntimeException e) {
+    public ResponseEntity<ApiError> internalServerErrorHandler(RuntimeException e) {
         LOGGER.warn("Catching exception : ", e);
         ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getClass().getName(), e.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiError> badRequestHandler(ApiException e) {
+        LOGGER.warn("Catching exception : ", e);
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST.value(), e.getClass().getName(), e.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 }
