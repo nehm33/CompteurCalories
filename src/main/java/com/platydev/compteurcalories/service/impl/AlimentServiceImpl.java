@@ -3,6 +3,7 @@ package com.platydev.compteurcalories.service.impl;
 import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
+import com.platydev.compteurcalories.entity.security.User;
 import com.platydev.compteurcalories.exception.ApiException;
 import com.platydev.compteurcalories.infrastructure.AlimentMapper;
 import com.platydev.compteurcalories.repository.AlimentRepository;
@@ -12,12 +13,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class AlimentServiceImpl implements AlimentService {
+
+    private static final User ADMIN = User.builder().id(1).build();
 
     private final AlimentRepository alimentRepository;
 
@@ -51,7 +55,24 @@ public class AlimentServiceImpl implements AlimentService {
 
     @Override
     public AlimentResponse getAllForUser(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        return null;
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        Page<Aliment> alimentPage = alimentRepository.findByUserOrUser(user, ADMIN, pageDetails);
+
+        List<Aliment> categories = alimentPage.getContent();
+        if (categories.isEmpty()) {
+            throw new ApiException("No aliment created until now");
+        }
+        List<AlimentDTO> alimentDTOS = categories.stream()
+                .map(alimentMapper::toDTO)
+                .toList();
+
+        return alimentMapper.toAlimentResponse(alimentDTOS, alimentPage);
     }
 
     @Override
