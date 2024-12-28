@@ -9,6 +9,6 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
 
-    @Mapping(target = "roles", expression = "java(java.util.Set.of(new com.platydev.compteurcalories.entity.security.Role(1,com.platydev.compteurcalories.entity.security.AppRole.ROLE_USER)))")
+    @Mapping(target = "roles", expression = "java(java.util.Set.of(new com.platydev.compteurcalories.entity.security.Role(2,com.platydev.compteurcalories.entity.security.AppRole.ROLE_USER)))")
     User toUser(SigninInput signinInput);
 }

@@ -3,7 +3,7 @@ package com.platydev.compteurcalories.dto.output;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record AlimentDTO(Long id, String nom, Float calories, String unite, Float matieresGrasses,
+public record AlimentDTO(String nom, Float calories, String unite, Float matieresGrasses,
                          Float matieresGrassesSatures, Float matieresGrassesMonoInsaturees, Float matieresGrassesPolyInsaturees,
                          Float matieresGrassesTrans, Float proteines, Float glucides, Float sucre, Float fibres, Float sel,
                          Float cholesterol, Float provitamineA, Float vitamineA, Float vitamineB1, Float vitamineB2,
