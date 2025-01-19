@@ -82,7 +82,13 @@ public class AlimentServiceImpl implements AlimentService {
 
     @Override
     public void add(AlimentDTO alimentDTO) {
-
+        Aliment aliment = alimentMapper.toEntity(alimentDTO);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        aliment.setUser(user);
+        if (aliment.getCodeBarre() != null) {
+            aliment.getCodeBarre().setAliment(aliment);
+        }
+        alimentRepository.save(aliment);
     }
 
     @Override

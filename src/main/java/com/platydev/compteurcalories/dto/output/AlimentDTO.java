@@ -12,5 +12,5 @@ public record AlimentDTO(String nom, Float calories, String unite, Float matiere
                          Float vitamineK1, Float vitamineK2, Float Ars, Float B, Float Ca, Float Cl, Float choline, Float Cr,
                          Float Co, Float Cu, Float Fe, Float F, Float I, Float Mg, Float Mn, Float Mo, Float Na, Float P,
                          Float K, Float Rb, Float SiO, Float S, Float Se, Float V, Float Sn, Float Zn,
-                         String codeBarre) {
+                         String codeBarre, String marque) {
 }

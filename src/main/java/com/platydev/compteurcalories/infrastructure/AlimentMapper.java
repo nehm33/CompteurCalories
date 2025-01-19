@@ -14,6 +14,7 @@ import java.util.List;
 public interface AlimentMapper {
 
     @Mapping(target = "codeBarre", source = "aliment.codeBarre.codeBarre")
+    @Mapping(target = "marque", source = "aliment.codeBarre.marque")
     AlimentDTO toDTO(Aliment aliment);
 
     @Mapping(target = "content", source = "alimentDTOS")
@@ -23,4 +24,7 @@ public interface AlimentMapper {
     @Mapping(target = "totalPages", expression = "java(page.getTotalPages())")
     @Mapping(target = "lastPage", expression = "java(page.isLast())")
     AlimentResponse toAlimentResponse(List<AlimentDTO> alimentDTOS, Page<Aliment> page);
+
+    @Mapping(target = "codeBarre", expression = "java(alimentDTO.codeBarre() != null ? new com.platydev.compteurcalories.entity.CodeBarre(alimentDTO.codeBarre(), alimentDTO.marque(), null) : null)")
+    Aliment toEntity(AlimentDTO alimentDTO);
 }

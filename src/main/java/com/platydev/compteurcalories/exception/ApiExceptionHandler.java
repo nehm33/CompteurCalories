@@ -2,6 +2,7 @@ package com.platydev.compteurcalories.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,10 +44,10 @@ public class ApiExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ApiError> badRequestHandler(ApiException e) {
+    @ExceptionHandler({ApiException.class, DataIntegrityViolationException.class})
+    public ResponseEntity<ApiError> badRequestHandler(Exception e) {
         LOGGER.warn("Catching exception : ", e);
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST.value(), e.getClass().getName(), e.getMessage());
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST.value(), e.getClass().getName(), e.getLocalizedMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 }

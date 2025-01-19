@@ -212,7 +212,7 @@ public class Aliment {
     @ToString.Exclude
     private CodeBarre codeBarre;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private User user;
