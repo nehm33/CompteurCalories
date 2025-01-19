@@ -11,4 +11,5 @@ public interface AlimentService {
     void add(AlimentDTO alimentDTO);
     AlimentDTO update(long alimentId, AlimentDTO alimentDTO);
     void delete(long alimentId);
+    boolean exist(String alimentName);
 }

@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AlimentServiceImpl implements AlimentService {
@@ -82,8 +83,12 @@ public class AlimentServiceImpl implements AlimentService {
 
     @Override
     public void add(AlimentDTO alimentDTO) {
-        Aliment aliment = alimentMapper.toEntity(alimentDTO);
+        if (exist(alimentDTO.nom())) {
+            throw new ApiException("This aliment already exists");
+        }
+
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Aliment aliment = alimentMapper.toEntity(alimentDTO);
         aliment.setUser(user);
         if (aliment.getCodeBarre() != null) {
             aliment.getCodeBarre().setAliment(aliment);
@@ -99,5 +104,12 @@ public class AlimentServiceImpl implements AlimentService {
     @Override
     public void delete(long alimentId) {
 
+    }
+
+    @Override
+    public boolean exist(String alimentName) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Aliment> alimentOptional = alimentRepository.findByNomAndByUser(alimentName, user);
+        return alimentOptional.isPresent();
     }
 }
