@@ -29,6 +29,8 @@ public class User implements UserDetails {
 
     @NotBlank
     @Size(max = 68)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)

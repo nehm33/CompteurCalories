@@ -5,6 +5,7 @@ import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import com.platydev.compteurcalories.entity.security.User;
 import com.platydev.compteurcalories.exception.ApiException;
+import com.platydev.compteurcalories.exception.NotFoundException;
 import com.platydev.compteurcalories.infrastructure.AlimentMapper;
 import com.platydev.compteurcalories.repository.AlimentRepository;
 import com.platydev.compteurcalories.service.AlimentService;
@@ -116,7 +117,13 @@ public class AlimentServiceImpl implements AlimentService {
 
     @Override
     public void delete(long alimentId) {
-
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Aliment aliment = alimentRepository.findById(alimentId)
+                .orElseThrow(() -> new NotFoundException("Aliment not found"));
+        if (!aliment.getUser().equals(user)) {
+            throw new ApiException("The given aliment is not yours");
+        }
+        alimentRepository.deleteById(alimentId);
     }
 
     @Override

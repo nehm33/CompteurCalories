@@ -51,8 +51,14 @@ public class AlimentController {
     }
 
     @PostMapping("/api/aliments")
-    public ResponseEntity<String> add(@RequestBody AlimentDTO alimentDTO) {
+    public ResponseEntity<Void> add(@RequestBody AlimentDTO alimentDTO) {
         alimentService.add(alimentDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/api/aliments/{alimentId}")
+    public ResponseEntity<Void> add(@RequestParam long alimentId) {
+        alimentService.delete(alimentId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
