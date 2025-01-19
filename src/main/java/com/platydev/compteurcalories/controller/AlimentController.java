@@ -39,6 +39,17 @@ public class AlimentController {
         return alimentService.getAllForUser(pageNumber, pageSize, sortBy, sortOrder);
     }
 
+    @GetMapping("/api/aliments")
+    public AlimentResponse getAllForUser(
+            @RequestParam(name = "search") String search,
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ALIMENTS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
+    ) {
+        return alimentService.search(search, pageNumber, pageSize, sortBy,sortOrder);
+    }
+
     @PostMapping("/api/aliments")
     public ResponseEntity<String> add(@RequestBody AlimentDTO alimentDTO) {
         alimentService.add(alimentDTO);

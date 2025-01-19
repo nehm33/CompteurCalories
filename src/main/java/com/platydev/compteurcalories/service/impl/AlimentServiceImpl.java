@@ -78,7 +78,20 @@ public class AlimentServiceImpl implements AlimentService {
 
     @Override
     public AlimentResponse search(String word, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        return null;
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        Page<Aliment> alimentPage = alimentRepository.findByNomLikeAndByUserOrByUser(word, user, ADMIN, pageDetails);
+
+        List<AlimentDTO> alimentDTOS = alimentPage.getContent().stream()
+                .map(alimentMapper::toDTO)
+                .toList();
+
+        return alimentMapper.toAlimentResponse(alimentDTOS, alimentPage);
     }
 
     @Override
