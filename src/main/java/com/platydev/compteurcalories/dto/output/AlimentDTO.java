@@ -1,8 +1,10 @@
 package com.platydev.compteurcalories.dto.output;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public record AlimentDTO(String nom, Float calories, String unite, Float matieresGrasses,
                          Float matieresGrassesSatures, Float matieresGrassesMonoInsaturees, Float matieresGrassesPolyInsaturees,
                          Float matieresGrassesTrans, Float proteines, Float glucides, Float sucre, Float fibres, Float sel,

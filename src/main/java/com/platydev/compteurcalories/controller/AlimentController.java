@@ -31,23 +31,13 @@ public class AlimentController {
 
     @GetMapping("/api/aliments")
     public AlimentResponse getAllForUser(
+            @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ALIMENTS_BY, required = false) String sortBy,
             @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
     ) {
-        return alimentService.getAllForUser(pageNumber, pageSize, sortBy, sortOrder);
-    }
-
-    @GetMapping("/api/aliments")
-    public AlimentResponse getAllForUser(
-            @RequestParam(name = "search") String search,
-            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ALIMENTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
-    ) {
-        return alimentService.search(search, pageNumber, pageSize, sortBy,sortOrder);
+        return alimentService.find(search, pageNumber, pageSize, sortBy,sortOrder);
     }
 
     @PostMapping("/api/aliments")
@@ -56,8 +46,14 @@ public class AlimentController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PutMapping("/api/aliments/{alimentId}")
+    public ResponseEntity<Void> update(@PathVariable long alimentId, @RequestBody AlimentDTO alimentDTO) {
+        alimentService.update(alimentId, alimentDTO);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @DeleteMapping("/api/aliments/{alimentId}")
-    public ResponseEntity<Void> add(@RequestParam long alimentId) {
+    public ResponseEntity<Void> delete(@PathVariable long alimentId) {
         alimentService.delete(alimentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

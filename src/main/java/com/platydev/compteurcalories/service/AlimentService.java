@@ -6,10 +6,9 @@ import com.platydev.compteurcalories.dto.output.AlimentResponse;
 public interface AlimentService {
 
     AlimentResponse getAll(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
-    AlimentResponse getAllForUser(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
-    AlimentResponse search(String word, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    AlimentResponse find(String word, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
     void add(AlimentDTO alimentDTO);
-    AlimentDTO update(long alimentId, AlimentDTO alimentDTO);
+    void update(long alimentId, AlimentDTO alimentDTO);
     void delete(long alimentId);
-    boolean exist(String alimentName);
+    boolean existsByName(String alimentName);
 }

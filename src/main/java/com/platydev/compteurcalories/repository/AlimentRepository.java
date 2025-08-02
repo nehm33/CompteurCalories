@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface AlimentRepository extends JpaRepository<Aliment, Long> {
 
-    Page<Aliment> findByNomLikeAndByUserOrByUser(String pattern, User user1, User user2, Pageable pageable);
-    Optional<Aliment> findByNomAndByUser(String nom, User user);
-    Page<Aliment> findByUserOrUser(User user1, User user2, Pageable pageable);
+    Page<Aliment> findByNomLikeAndUserOrUser(String pattern, User user1, User user2, Pageable pageable);
+    Optional<Aliment> findByNomAndUser(String nom, User user);
 }
