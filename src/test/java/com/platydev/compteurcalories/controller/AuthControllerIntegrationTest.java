@@ -23,16 +23,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @Sql(scripts = "classpath:sql/init_test_data.sql", config = @SqlConfig(encoding = "utf-8"), executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 class AuthControllerIntegrationTest {
 
+    private final TestRestTemplate restTemplate;
+
+    private final UserRepository userRepository;
+
     @LocalServerPort
     private int port;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
-    private UserRepository userRepository;
-
     private String baseUrl;
+
+    @Autowired
+    public AuthControllerIntegrationTest(TestRestTemplate restTemplate, UserRepository userRepository) {
+        this.restTemplate = restTemplate;
+        this.userRepository = userRepository;
+    }
 
     @BeforeEach
     void setUp() {

@@ -1,10 +1,11 @@
 package com.platydev.compteurcalories.controller;
 
-import com.platydev.compteurcalories.config.AppConstants;
 import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.service.AlimentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,24 +21,16 @@ public class AlimentController {
     }
 
     @GetMapping("/admin/aliments")
-    public AlimentResponse getAll(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ALIMENTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
-    ) {
-        return alimentService.getAll(pageNumber, pageSize, sortBy, sortOrder);
+    public AlimentResponse getAll(@PageableDefault Pageable pageable) {
+        return alimentService.getAll(pageable);
     }
 
     @GetMapping("/api/aliments")
     public AlimentResponse getAllForUser(
             @RequestParam(name = "search", required = false) String search,
-            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ALIMENTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
+            @PageableDefault Pageable pageable
     ) {
-        return alimentService.find(search, pageNumber, pageSize, sortBy,sortOrder);
+        return alimentService.find(pageable, search);
     }
 
     @PostMapping("/api/aliments")

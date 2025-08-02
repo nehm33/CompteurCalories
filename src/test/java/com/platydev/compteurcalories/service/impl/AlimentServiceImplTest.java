@@ -13,9 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,42 +45,32 @@ class AlimentServiceImplTest {
     @Test
     void getAll_shouldReturnAlimentResponse_whenAlimentsExist() {
         // Arrange
-        int pageNumber = 0;
-        int pageSize = 10;
-        String sortBy = "nom";
-        String sortOrder = "asc";
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("nom")));
         List<Aliment> aliments = List.of(new Aliment());
         Page<Aliment> page = new PageImpl<>(aliments);
         List<AlimentDTO> alimentDTOS = List.of(mock(AlimentDTO.class));
-        AlimentResponse expectedResponse = mock(AlimentResponse.class);
 
         when(alimentRepository.findAll(any(Pageable.class))).thenReturn(page);
-        when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.get(0));
-        when(alimentMapper.toAlimentResponse(eq(alimentDTOS), eq(page))).thenReturn(expectedResponse);
-
+        when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.getFirst());
         // Act
-        AlimentResponse result = alimentService.getAll(pageNumber, pageSize, sortBy, sortOrder);
+        AlimentResponse result = alimentService.getAll(pageable);
 
         // Assert
-        assertEquals(expectedResponse, result);
+        assertEquals(1, result.totalElements());
         verify(alimentRepository).findAll(any(Pageable.class));
         verify(alimentMapper).toDTO(any(Aliment.class));
-        verify(alimentMapper).toAlimentResponse(eq(alimentDTOS), eq(page));
     }
 
     @Test
     void getAll_shouldThrowApiException_whenNoAlimentsExist() {
         // Arrange
-        int pageNumber = 0;
-        int pageSize = 10;
-        String sortBy = "nom";
-        String sortOrder = "asc";
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("nom")));
         Page<Aliment> emptyPage = new PageImpl<>(Collections.emptyList());
         when(alimentRepository.findAll(any(Pageable.class))).thenReturn(emptyPage);
 
         // Act & Assert
         ApiException exception = assertThrows(ApiException.class, () ->
-                alimentService.getAll(pageNumber, pageSize, sortBy, sortOrder)
+                alimentService.getAll(pageable)
         );
         assertEquals("No aliment created until now", exception.getMessage());
         verify(alimentRepository).findAll(any(Pageable.class));
@@ -92,14 +80,10 @@ class AlimentServiceImplTest {
     @Test
     void find_shouldReturnAlimentResponse() {
         // Arrange
-        int pageNumber = 0;
-        int pageSize = 10;
-        String sortBy = "nom";
-        String sortOrder = "asc";
-        String word = "%test%";
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("nom")));
+        String word = "test";
         Page<Aliment> page = new PageImpl<>(List.of(new Aliment()));
         List<AlimentDTO> alimentDTOS = List.of(mock(AlimentDTO.class));
-        AlimentResponse expectedResponse = mock(AlimentResponse.class);
         User user = mock(User.class);
 
         // Mock SecurityContext
@@ -109,15 +93,14 @@ class AlimentServiceImplTest {
         when(authentication.getPrincipal()).thenReturn(user);
         SecurityContextHolder.setContext(securityContext);
 
-        when(alimentRepository.findByNomLikeAndUserOrUser(eq(word), eq(user), any(), any(Pageable.class))).thenReturn(page);
-        when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.get(0));
-        when(alimentMapper.toAlimentResponse(eq(alimentDTOS), eq(page))).thenReturn(expectedResponse);
+        when(alimentRepository.findUserAlimentsByNomOrCodeBarre(any(Pageable.class), eq("%" + word + "%"), any(User.class))).thenReturn(page);
+        when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.getFirst());
 
         // Act
-        AlimentResponse result = alimentService.find(word, pageNumber, pageSize, sortBy, sortOrder);
+        AlimentResponse result = alimentService.find(pageable, word);
 
         // Assert
-        assertEquals(expectedResponse, result);
+        assertEquals(1, result.totalElements());
     }
 
     @Test
@@ -175,6 +158,7 @@ class AlimentServiceImplTest {
         aliment.setUser(user);
         
         when(alimentRepository.findById(alimentId)).thenReturn(Optional.of(aliment));
+        when(codeBarreRepository.findByAlimentId(alimentId)).thenReturn(Optional.empty());
         when(alimentMapper.toEntity(alimentDTO)).thenReturn(aliment);
         when(alimentRepository.save(any(Aliment.class))).thenReturn(aliment);
         when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(mock(AlimentDTO.class));

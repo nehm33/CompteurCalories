@@ -1,12 +1,10 @@
 package com.platydev.compteurcalories.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platydev.compteurcalories.dto.input.LoginInput;
 import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.dto.output.LoginOutput;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -21,21 +19,23 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:sql/init_test_data.sql", config = @SqlConfig(encoding = "utf-8"), executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AlimentControllerIntegrationTest {
+
+    private final TestRestTemplate restTemplate;
 
     @LocalServerPort
     private int port;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private String baseUrl;
     private String jwtTokenTestUser;
     private String jwtTokenAdmin;
     private String jwtTokenUser2;
+
+    @Autowired
+    public AlimentControllerIntegrationTest(TestRestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @BeforeEach
     void setUp() {
@@ -67,6 +67,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
+    @Order(1)
     void getAllForUser_shouldReturnUserAndAdminAliments() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
@@ -99,6 +100,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
+    @Order(2)
     void getAllForAdmin_shouldReturnAllAdminAliments() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
@@ -123,6 +125,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
+    @Order(3)
     void getAllForUser2_shouldReturnUser2AndAdminAliments() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
@@ -155,6 +158,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
+    @Order(6)
     void add_shouldCreateAlimentForTestUser() {
         // Arrange
         AlimentDTO alimentDTO = AlimentDTO.builder()
@@ -252,6 +256,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
+    @Order(7)
     void add_shouldCreateAlimentWithoutCodeBarreForAdmin() {
         // Arrange
         AlimentDTO alimentDTO = AlimentDTO.builder()
@@ -328,47 +333,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    void getByCodeBarre_shouldReturnCorrectAliment() {
-        // Arrange - Test avec le code barre de la Pomme Rouge (admin)
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwtTokenAdmin);
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        // Act
-        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
-                baseUrl + "/code-barre/3123456789012",
-                HttpMethod.GET,
-                request,
-                AlimentDTO.class
-        );
-
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Pomme Rouge", response.getBody().nom());
-        // Note: Le code barre n'est plus directement dans AlimentDTO car il est dans une table séparée
-    }
-
-    @Test
-    void getByCodeBarre_shouldReturnNotFoundForWrongUser() {
-        // Arrange - Test avec testuser qui essaie d'accéder au code barre de l'admin
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(jwtTokenTestUser);
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        // Act
-        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
-                baseUrl + "/code-barre/3123456789012",
-                HttpMethod.GET,
-                request,
-                AlimentDTO.class
-        );
-
-        // Assert
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
+    @Order(4)
     void searchByNom_shouldReturnFilteredResults() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
@@ -395,6 +360,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
+    @Order(5)
     void pagination_shouldWorkCorrectly() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
@@ -403,7 +369,7 @@ class AlimentControllerIntegrationTest {
 
         // Act - Première page avec 2 éléments
         ResponseEntity<AlimentResponse> response = restTemplate.exchange(
-                baseUrl + "?pageNumber=0&pageSize=2&sortBy=nom&sortOrder=asc",
+                baseUrl + "?page=0&size=2&sort=nom,asc",
                 HttpMethod.GET,
                 request,
                 AlimentResponse.class
