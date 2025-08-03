@@ -388,6 +388,153 @@ class AlimentControllerIntegrationTest {
 
     @Test
     @Order(8)
+    void getById_shouldReturnAlimentForTestUser() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        // Supposons que l'aliment "Brocoli" de testuser a l'ID 8
+        long alimentId = 7L;
+
+        // Act
+        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.GET,
+                request,
+                AlimentDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Brocoli", response.getBody().nom());
+        assertNotNull(response.getBody().calories());
+        assertEquals("g", response.getBody().unite());
+    }
+
+    @Test
+    @Order(9)
+    void getById_shouldReturnAdminAlimentForUser() {
+        // Arrange - Un utilisateur peut voir les aliments de l'admin
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        // Supposons que l'aliment "Pomme Rouge" de l'admin a l'ID 1
+        long adminAlimentId = 1L;
+
+        // Act
+        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
+                baseUrl + "/" + adminAlimentId,
+                HttpMethod.GET,
+                request,
+                AlimentDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Pomme Rouge", response.getBody().nom());
+        assertNotNull(response.getBody().calories());
+    }
+
+    @Test
+    @Order(10)
+    void getById_shouldReturnAlimentForAdmin() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenAdmin);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        // Supposons que l'aliment "Pomme Rouge" de l'admin a l'ID 1
+        long alimentId = 1L;
+
+        // Act
+        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.GET,
+                request,
+                AlimentDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Pomme Rouge", response.getBody().nom());
+        assertNotNull(response.getBody().calories());
+        assertEquals("g", response.getBody().unite());
+    }
+
+    @Test
+    @Order(11)
+    void getById_shouldReturn404WhenAlimentNotFound() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        long nonExistentId = 99999L;
+
+        // Act
+        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
+                baseUrl + "/" + nonExistentId,
+                HttpMethod.GET,
+                request,
+                AlimentDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    @Order(12)
+    void getById_shouldReturn403WhenAccessingOtherUserAliment() {
+        // Arrange testuser essaie d'accéder à un aliment de user2
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        // Supposons que l'aliment "Avocat" de user2 a l'ID 6
+        long user2AlimentId = 9L;
+
+        // Act
+        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
+                baseUrl + "/" + user2AlimentId,
+                HttpMethod.GET,
+                request,
+                AlimentDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
+    @Order(13)
+    void getById_shouldReturn401WhenNotAuthenticated() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        // Pas de token JWT
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        long alimentId = 1L;
+
+        // Act
+        ResponseEntity<AlimentDTO> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.GET,
+                request,
+                AlimentDTO.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    @Order(14)
     void update_shouldUpdateAlimentForTestUser() {
         // Arrange - D'abord créer un aliment à modifier
         AlimentDTO alimentDTO = AlimentDTO.builder()
@@ -426,12 +573,12 @@ class AlimentControllerIntegrationTest {
 
         assertNotNull(getResponse.getBody());
         assertFalse(getResponse.getBody().content().isEmpty());
-
-        long alimentId = 13; // À remplacer par la logique réelle pour récupérer l'ID
+        // Pour cet exemple, on suppose que l'ID est 100 (à adapter selon votre logique).
+        long alimentId = 13L; // À remplacer par la logique réelle pour récupérer l'ID
 
         // Préparer les données de mise à jour
         AlimentDTO alimentDTOUpdate = AlimentDTO.builder()
-                .nom("Pomme Jaune")
+                .nom("Pomme Modifiée")
                 .calories(55.0f)
                 .unite("g")
                 .matieresGrasses(0.15f)
@@ -456,7 +603,7 @@ class AlimentControllerIntegrationTest {
 
         // Vérifier que l'aliment a été modifié
         ResponseEntity<AlimentResponse> verifyResponse = restTemplate.exchange(
-                baseUrl + "?search=Pomme Jaune",
+                baseUrl + "?search=Pomme Modifiée",
                 HttpMethod.GET,
                 getRequest,
                 AlimentResponse.class
@@ -465,12 +612,12 @@ class AlimentControllerIntegrationTest {
         assertEquals(HttpStatus.OK, verifyResponse.getStatusCode());
         assertNotNull(verifyResponse.getBody());
         assertTrue(verifyResponse.getBody().content().stream()
-                .anyMatch(aliment -> "Pomme Jaune".equals(aliment.nom()) &&
+                .anyMatch(aliment -> "Pomme Modifiée".equals(aliment.nom()) &&
                         aliment.calories().equals(55.0f)));
     }
 
     @Test
-    @Order(9)
+    @Order(15)
     void update_shouldUpdateAlimentForAdmin() {
         // Arrange
         AlimentDTO alimentDTOUpdate = AlimentDTO.builder()
@@ -490,6 +637,7 @@ class AlimentControllerIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AlimentDTO> request = new HttpEntity<>(alimentDTOUpdate, headers);
 
+        // Supposons que l'aliment "Pomme Rouge" de l'admin a l'ID 1
         long alimentId = 1L;
 
         // Act
@@ -505,7 +653,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(10)
+    @Order(16)
     void update_shouldReturn404WhenAlimentNotFound() {
         // Arrange
         AlimentDTO alimentDTO = AlimentDTO.builder()
@@ -534,7 +682,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(11)
+    @Order(17)
     void update_shouldReturn403WhenUpdatingOtherUserAliment() {
         // Arrange testuser essaie de modifier un aliment de user2
         AlimentDTO alimentDTO = AlimentDTO.builder()
@@ -564,7 +712,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(12)
+    @Order(18)
     void delete_shouldDeleteAlimentForTestUser() {
         // Arrange - D'abord créer un aliment à supprimer
         AlimentDTO alimentDTO = AlimentDTO.builder()
@@ -636,7 +784,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(13)
+    @Order(19)
     void delete_shouldDeleteAlimentForAdmin() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
@@ -682,7 +830,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(14)
+    @Order(20)
     void delete_shouldReturn404WhenAlimentNotFound() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();
@@ -703,7 +851,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(15)
+    @Order(21)
     void delete_shouldReturn403WhenDeletingOtherUserAliment() {
         // Arrange testuser essaie de supprimer un aliment de user2
         HttpHeaders headers = new HttpHeaders();
@@ -725,7 +873,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(16)
+    @Order(22)
     void update_shouldReturn401WhenNotAuthenticated() {
         // Arrange
         AlimentDTO alimentDTO = AlimentDTO.builder()
@@ -754,7 +902,7 @@ class AlimentControllerIntegrationTest {
     }
 
     @Test
-    @Order(17)
+    @Order(23)
     void delete_shouldReturn401WhenNotAuthenticated() {
         // Arrange
         HttpHeaders headers = new HttpHeaders();

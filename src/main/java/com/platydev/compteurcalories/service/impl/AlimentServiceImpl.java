@@ -73,9 +73,12 @@ public class AlimentServiceImpl implements AlimentService {
     @Override
     public AlimentDTO findById(long alimentId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        existsByIdAndByUser(alimentId, user);
 
-        Aliment aliment = alimentRepository.findById(alimentId).orElseThrow(() -> new NotFoundException("Aliment not found"));
+        Aliment aliment = alimentRepository.findById(alimentId).orElseThrow(() -> new NotFoundException("Aliment with id " + alimentId + " not found"));
+
+        if (!aliment.getUser().equals(user) && aliment.getUser().getId() != 1L) {
+            throw new ForbiddenException("The given aliment is not yours");
+        }
 
         return alimentMapper.toDTO(aliment);
     }
