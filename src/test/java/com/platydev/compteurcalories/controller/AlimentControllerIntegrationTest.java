@@ -78,7 +78,7 @@ class AlimentControllerIntegrationTest {
 
         // Act
         ResponseEntity<AlimentResponse> response = restTemplate.exchange(
-                baseUrl + "?pageNumber=0&pageSize=20&sortBy=nom&sortOrder=asc",
+                baseUrl + "?page=0&size=20&sort=nom,asc",
                 HttpMethod.GET,
                 request,
                 AlimentResponse.class
@@ -111,7 +111,7 @@ class AlimentControllerIntegrationTest {
 
         // Act
         ResponseEntity<AlimentResponse> response = restTemplate.exchange(
-                baseUrl + "?pageNumber=0&pageSize=20&sortBy=nom&sortOrder=asc",
+                baseUrl + "?page=0&size=20&sort=nom,asc",
                 HttpMethod.GET,
                 request,
                 AlimentResponse.class
@@ -136,7 +136,7 @@ class AlimentControllerIntegrationTest {
 
         // Act
         ResponseEntity<AlimentResponse> response = restTemplate.exchange(
-                baseUrl + "?pageNumber=0&pageSize=20&sortBy=nom&sortOrder=asc",
+                baseUrl + "?page=0&size=20&sort=nom,asc",
                 HttpMethod.GET,
                 request,
                 AlimentResponse.class
@@ -241,7 +241,7 @@ class AlimentControllerIntegrationTest {
         HttpEntity<Void> getRequest = new HttpEntity<>(getHeaders);
         
         ResponseEntity<AlimentResponse> getResponse = restTemplate.exchange(
-                baseUrl + "?pageNumber=0&pageSize=20&sortBy=nom&sortOrder=asc",
+                baseUrl + "?page=0&size=20&sort=nom,asc",
                 HttpMethod.GET,
                 getRequest,
                 AlimentResponse.class
@@ -249,7 +249,7 @@ class AlimentControllerIntegrationTest {
         
         assertEquals(HttpStatus.OK, getResponse.getStatusCode());
         assertNotNull(getResponse.getBody());
-        // Maintenant testuser devrait avoir 9 aliments (3 siens + 5 admin + 1 nouveau)
+        // Maintenant testuser devrait avoir 9 aliments (3 siens + 5 admin + 1 nouveau).
         assertEquals(9, getResponse.getBody().content().size());
         
         // Vérifier que le nouvel aliment est présent
@@ -344,7 +344,7 @@ class AlimentControllerIntegrationTest {
 
         // Act - Rechercher les aliments contenant "ro" (Brocoli et Carotte)
         ResponseEntity<AlimentResponse> response = restTemplate.exchange(
-                baseUrl + "?pageNumber=0&pageSize=10&sortBy=nom&sortOrder=asc&search=ro",
+                baseUrl + "?page=0&size=20&sort=nom,asc&search=ro",
                 HttpMethod.GET,
                 request,
                 AlimentResponse.class
@@ -384,5 +384,394 @@ class AlimentControllerIntegrationTest {
         assertEquals(5, response.getBody().totalElements());
         assertEquals(3, response.getBody().totalPages());
         assertFalse(response.getBody().lastPage());
+    }
+
+    @Test
+    @Order(8)
+    void update_shouldUpdateAlimentForTestUser() {
+        // Arrange - D'abord créer un aliment à modifier
+        AlimentDTO alimentDTO = AlimentDTO.builder()
+                .nom("Pomme à Modifier")
+                .calories(50.0f)
+                .unite("g")
+                .matieresGrasses(0.1f)
+                .proteines(0.2f)
+                .glucides(13.0f)
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AlimentDTO> createRequest = new HttpEntity<>(alimentDTO, headers);
+
+        // Créer l'aliment
+        ResponseEntity<Void> createResponse = restTemplate.postForEntity(
+                baseUrl,
+                createRequest,
+                Void.class
+        );
+        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+
+        // Récupérer l'ID de l'aliment créé (en supposant qu'on puisse le récupérer par recherche)
+        HttpHeaders getHeaders = new HttpHeaders();
+        getHeaders.setBearerAuth(jwtTokenTestUser);
+        HttpEntity<Void> getRequest = new HttpEntity<>(getHeaders);
+
+        ResponseEntity<AlimentResponse> getResponse = restTemplate.exchange(
+                baseUrl + "?search=Pomme à Modifier",
+                HttpMethod.GET,
+                getRequest,
+                AlimentResponse.class
+        );
+
+        assertNotNull(getResponse.getBody());
+        assertFalse(getResponse.getBody().content().isEmpty());
+
+        long alimentId = 13; // À remplacer par la logique réelle pour récupérer l'ID
+
+        // Préparer les données de mise à jour
+        AlimentDTO alimentDTOUpdate = AlimentDTO.builder()
+                .nom("Pomme Jaune")
+                .calories(55.0f)
+                .unite("g")
+                .matieresGrasses(0.15f)
+                .proteines(0.3f)
+                .glucides(14.0f)
+                .sucre(12.0f)
+                .fibres(2.0f)
+                .build();
+
+        HttpEntity<AlimentDTO> updateRequest = new HttpEntity<>(alimentDTOUpdate, headers);
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.PUT,
+                updateRequest,
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+        // Vérifier que l'aliment a été modifié
+        ResponseEntity<AlimentResponse> verifyResponse = restTemplate.exchange(
+                baseUrl + "?search=Pomme Jaune",
+                HttpMethod.GET,
+                getRequest,
+                AlimentResponse.class
+        );
+
+        assertEquals(HttpStatus.OK, verifyResponse.getStatusCode());
+        assertNotNull(verifyResponse.getBody());
+        assertTrue(verifyResponse.getBody().content().stream()
+                .anyMatch(aliment -> "Pomme Jaune".equals(aliment.nom()) &&
+                        aliment.calories().equals(55.0f)));
+    }
+
+    @Test
+    @Order(9)
+    void update_shouldUpdateAlimentForAdmin() {
+        // Arrange
+        AlimentDTO alimentDTOUpdate = AlimentDTO.builder()
+                .nom("Pomme Rouge Modifiée")
+                .calories(60.0f)
+                .unite("g")
+                .matieresGrasses(0.2f)
+                .proteines(0.4f)
+                .glucides(15.0f)
+                .sucre(13.0f)
+                .fibres(2.5f)
+                .sel(0.001f)
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenAdmin);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AlimentDTO> request = new HttpEntity<>(alimentDTOUpdate, headers);
+
+        long alimentId = 1L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.PUT,
+                request,
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    @Order(10)
+    void update_shouldReturn404WhenAlimentNotFound() {
+        // Arrange
+        AlimentDTO alimentDTO = AlimentDTO.builder()
+                .nom("Aliment Inexistant")
+                .calories(100.0f)
+                .unite("g")
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AlimentDTO> request = new HttpEntity<>(alimentDTO, headers);
+
+        long nonExistentId = 99999L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + nonExistentId,
+                HttpMethod.PUT,
+                request,
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    @Order(11)
+    void update_shouldReturn403WhenUpdatingOtherUserAliment() {
+        // Arrange testuser essaie de modifier un aliment de user2
+        AlimentDTO alimentDTO = AlimentDTO.builder()
+                .nom("Avocat Modifié")
+                .calories(200.0f)
+                .unite("g")
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AlimentDTO> request = new HttpEntity<>(alimentDTO, headers);
+
+        // Supposons que l'aliment "Avocat" de user2 a l'ID 6
+        long user2AlimentId = 9L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + user2AlimentId,
+                HttpMethod.PUT,
+                request,
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
+    @Order(12)
+    void delete_shouldDeleteAlimentForTestUser() {
+        // Arrange - D'abord créer un aliment à supprimer
+        AlimentDTO alimentDTO = AlimentDTO.builder()
+                .nom("Aliment à Supprimer")
+                .calories(100.0f)
+                .unite("g")
+                .matieresGrasses(1.0f)
+                .proteines(2.0f)
+                .glucides(20.0f)
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AlimentDTO> createRequest = new HttpEntity<>(alimentDTO, headers);
+
+        // Créer l'aliment
+        ResponseEntity<Void> createResponse = restTemplate.postForEntity(
+                baseUrl,
+                createRequest,
+                Void.class
+        );
+        assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+
+        // Récupérer le nombre d'aliments avant suppression
+        HttpHeaders getHeaders = new HttpHeaders();
+        getHeaders.setBearerAuth(jwtTokenTestUser);
+        HttpEntity<Void> getRequest = new HttpEntity<>(getHeaders);
+
+        ResponseEntity<AlimentResponse> beforeResponse = restTemplate.exchange(
+                baseUrl + "?page=0&size=50",
+                HttpMethod.GET,
+                getRequest,
+                AlimentResponse.class
+        );
+
+        assertNotNull(beforeResponse.getBody());
+        int countBefore = beforeResponse.getBody().content().size();
+
+        // Supposons que l'aliment créé a l'ID 101
+        long alimentId = 14L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+        // Vérifier que l'aliment a été supprimé
+        ResponseEntity<AlimentResponse> afterResponse = restTemplate.exchange(
+                baseUrl + "?page=0&size=50",
+                HttpMethod.GET,
+                getRequest,
+                AlimentResponse.class
+        );
+
+        assertNotNull(afterResponse.getBody());
+        int countAfter = afterResponse.getBody().content().size();
+        assertEquals(countBefore - 1, countAfter);
+
+        // Vérifier que l'aliment spécifique n'existe plus
+        assertFalse(afterResponse.getBody().content().stream()
+                .anyMatch(aliment -> "Aliment à Supprimer".equals(aliment.nom())));
+    }
+
+    @Test
+    @Order(13)
+    void delete_shouldDeleteAlimentForAdmin() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenAdmin);
+
+        // Récupérer le nombre d'aliments avant suppression
+        HttpEntity<Void> getRequest = new HttpEntity<>(headers);
+        ResponseEntity<AlimentResponse> beforeResponse = restTemplate.exchange(
+                baseUrl + "?page=0&size=50",
+                HttpMethod.GET,
+                getRequest,
+                AlimentResponse.class
+        );
+
+        assertNotNull(beforeResponse.getBody());
+        int countBefore = beforeResponse.getBody().content().size();
+
+        // Supposons que l'admin supprime l'aliment "Banane" avec l'ID 2
+        long alimentId = 2L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+        // Vérifier que l'aliment a été supprimé
+        ResponseEntity<AlimentResponse> afterResponse = restTemplate.exchange(
+                baseUrl + "?page=0&size=50",
+                HttpMethod.GET,
+                getRequest,
+                AlimentResponse.class
+        );
+
+        assertNotNull(afterResponse.getBody());
+        int countAfter = afterResponse.getBody().content().size();
+        assertEquals(countBefore - 1, countAfter);
+    }
+
+    @Test
+    @Order(14)
+    void delete_shouldReturn404WhenAlimentNotFound() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+
+        long nonExistentId = 99999L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + nonExistentId,
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    @Order(15)
+    void delete_shouldReturn403WhenDeletingOtherUserAliment() {
+        // Arrange testuser essaie de supprimer un aliment de user2
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(jwtTokenTestUser);
+
+        // Supposons que l'aliment "Pain Complet" de user2 a l'ID 7
+        long user2AlimentId = 10L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + user2AlimentId,
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
+    @Order(16)
+    void update_shouldReturn401WhenNotAuthenticated() {
+        // Arrange
+        AlimentDTO alimentDTO = AlimentDTO.builder()
+                .nom("Test Sans Auth")
+                .calories(100.0f)
+                .unite("g")
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // Pas de token JWT
+        HttpEntity<AlimentDTO> request = new HttpEntity<>(alimentDTO, headers);
+
+        long alimentId = 1L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.PUT,
+                request,
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    @Order(17)
+    void delete_shouldReturn401WhenNotAuthenticated() {
+        // Arrange
+        HttpHeaders headers = new HttpHeaders();
+        // Pas de token JWT
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        long alimentId = 1L;
+
+        // Act
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + alimentId,
+                HttpMethod.DELETE,
+                request,
+                Void.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 }

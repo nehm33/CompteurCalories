@@ -50,4 +50,18 @@ public class ApiExceptionHandler {
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST.value(), e.getClass().getName(), e.getLocalizedMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler({NotFoundException.class})
+    public ResponseEntity<ApiError> notFoundHandler(Exception e) {
+        LOGGER.warn("Catching exception : ", e);
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND.value(), e.getClass().getName(), e.getLocalizedMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({ForbiddenException.class})
+    public ResponseEntity<ApiError> forbiddenHandler(Exception e) {
+        LOGGER.warn("Catching exception : ", e);
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN.value(), e.getClass().getName(), e.getLocalizedMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.FORBIDDEN);
+    }
 }

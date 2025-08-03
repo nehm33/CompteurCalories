@@ -6,6 +6,7 @@ import com.platydev.compteurcalories.entity.Aliment;
 import com.platydev.compteurcalories.entity.CodeBarre;
 import com.platydev.compteurcalories.entity.security.User;
 import com.platydev.compteurcalories.exception.ApiException;
+import com.platydev.compteurcalories.exception.ForbiddenException;
 import com.platydev.compteurcalories.exception.NotFoundException;
 import com.platydev.compteurcalories.infrastructure.AlimentMapper;
 import com.platydev.compteurcalories.repository.AlimentRepository;
@@ -124,7 +125,7 @@ public class AlimentServiceImpl implements AlimentService {
                 .orElseThrow(() -> new NotFoundException("Aliment not found"));
 
         if (!user.equals(aliment.getUser())) {
-            throw new ApiException("The given aliment is not yours");
+            throw new ForbiddenException("The given aliment is not yours");
         }
     }
 }
