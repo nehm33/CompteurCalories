@@ -1,7 +1,7 @@
 package com.platydev.compteurcalories.controller;
 
+import com.platydev.compteurcalories.dto.AlimentDTO;
 import com.platydev.compteurcalories.dto.input.LoginInput;
-import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.dto.output.LoginOutput;
 import org.junit.jupiter.api.*;

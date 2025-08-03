@@ -1,6 +1,6 @@
 package com.platydev.compteurcalories.service.impl;
 
-import com.platydev.compteurcalories.dto.output.AlimentDTO;
+import com.platydev.compteurcalories.dto.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import com.platydev.compteurcalories.entity.CodeBarre;
@@ -71,6 +71,16 @@ public class AlimentServiceImpl implements AlimentService {
     }
 
     @Override
+    public AlimentDTO findById(long alimentId) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        existsByIdAndByUser(alimentId, user);
+
+        Aliment aliment = alimentRepository.findById(alimentId).orElseThrow(() -> new NotFoundException("Aliment not found"));
+
+        return alimentMapper.toDTO(aliment);
+    }
+
+    @Override
     public void add(AlimentDTO alimentDTO) {
         if (existsByName(alimentDTO.nom())) {
             throw new ApiException("This aliment already exists");
@@ -122,7 +132,7 @@ public class AlimentServiceImpl implements AlimentService {
 
     private void existsByIdAndByUser(long alimentId, User user) {
         Aliment aliment = alimentRepository.findById(alimentId)
-                .orElseThrow(() -> new NotFoundException("Aliment not found"));
+                .orElseThrow(() -> new NotFoundException("Aliment with id " + alimentId+ " not found"));
 
         if (!user.equals(aliment.getUser())) {
             throw new ForbiddenException("The given aliment is not yours");

@@ -1,6 +1,6 @@
 package com.platydev.compteurcalories.controller;
 
-import com.platydev.compteurcalories.dto.output.AlimentDTO;
+import com.platydev.compteurcalories.dto.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.service.AlimentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,11 @@ public class AlimentController {
         return alimentService.find(pageable, search);
     }
 
+    @GetMapping("/api/aliments/{alimentId}")
+    public AlimentDTO get(@PathVariable long alimentId) {
+        return alimentService.findById(alimentId);
+    }
+
     @PostMapping("/api/aliments")
     public ResponseEntity<Void> add(@RequestBody AlimentDTO alimentDTO) {
         alimentService.add(alimentDTO);
@@ -40,7 +45,7 @@ public class AlimentController {
     }
 
     @PutMapping("/api/aliments/{alimentId}")
-    public ResponseEntity<Void> update(@PathVariable long alimentId, @RequestBody AlimentDTO alimentDTO) {
+    public ResponseEntity<Void> get(@PathVariable long alimentId, @RequestBody AlimentDTO alimentDTO) {
         alimentService.update(alimentId, alimentDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

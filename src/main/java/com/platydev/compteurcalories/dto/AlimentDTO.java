@@ -1,4 +1,4 @@
-package com.platydev.compteurcalories.dto.output;
+package com.platydev.compteurcalories.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

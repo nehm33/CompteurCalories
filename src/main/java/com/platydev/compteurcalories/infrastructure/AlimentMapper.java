@@ -1,6 +1,6 @@
 package com.platydev.compteurcalories.infrastructure;
 
-import com.platydev.compteurcalories.dto.output.AlimentDTO;
+import com.platydev.compteurcalories.dto.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import org.mapstruct.Mapper;
