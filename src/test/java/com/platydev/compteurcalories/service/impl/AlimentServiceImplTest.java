@@ -49,14 +49,16 @@ class AlimentServiceImplTest {
         List<Aliment> aliments = List.of(new Aliment());
         Page<Aliment> page = new PageImpl<>(aliments);
         List<AlimentDTO> alimentDTOS = List.of(mock(AlimentDTO.class));
+        AlimentResponse response = mock(AlimentResponse.class);
 
         when(alimentRepository.findAll(any(Pageable.class))).thenReturn(page);
         when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.getFirst());
+        when(alimentMapper.toAlimentResponse(any(), any())).thenReturn(response);
         // Act
         AlimentResponse result = alimentService.getAll(pageable);
 
         // Assert
-        assertEquals(1, result.totalElements());
+        assertEquals(response, result);
         verify(alimentRepository).findAll(any(Pageable.class));
         verify(alimentMapper).toDTO(any(Aliment.class));
     }
@@ -84,6 +86,7 @@ class AlimentServiceImplTest {
         String word = "test";
         Page<Aliment> page = new PageImpl<>(List.of(new Aliment()));
         List<AlimentDTO> alimentDTOS = List.of(mock(AlimentDTO.class));
+        AlimentResponse response = mock(AlimentResponse.class);
         User user = mock(User.class);
 
         // Mock SecurityContext
@@ -95,12 +98,13 @@ class AlimentServiceImplTest {
 
         when(alimentRepository.findUserAlimentsByNomOrCodeBarre(any(Pageable.class), eq("%" + word + "%"), any(User.class))).thenReturn(page);
         when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.getFirst());
+        when(alimentMapper.toAlimentResponse(any(), any())).thenReturn(response);
 
         // Act
         AlimentResponse result = alimentService.find(pageable, word);
 
         // Assert
-        assertEquals(1, result.totalElements());
+        assertEquals(response, result);
     }
 
     @Test
