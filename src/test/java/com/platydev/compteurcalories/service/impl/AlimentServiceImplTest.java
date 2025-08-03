@@ -5,6 +5,7 @@ import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import com.platydev.compteurcalories.entity.security.User;
 import com.platydev.compteurcalories.exception.ApiException;
+import com.platydev.compteurcalories.exception.ForbiddenException;
 import com.platydev.compteurcalories.infrastructure.AlimentMapper;
 import com.platydev.compteurcalories.repository.AlimentRepository;
 import com.platydev.compteurcalories.repository.CodeBarreRepository;
@@ -182,7 +183,7 @@ class AlimentServiceImplTest {
     }
 
     @Test
-    void update_shouldThrowApiException_whenNotOwned() {
+    void update_shouldThrowForbiddenException_whenNotOwned() {
         // Arrange
         long alimentId = 1L;
         AlimentDTO alimentDTO = mock(AlimentDTO.class);
@@ -201,7 +202,7 @@ class AlimentServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
 
         // Act & Assert
-        ApiException exception = assertThrows(ApiException.class, () -> alimentService.update(alimentId, alimentDTO));
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> alimentService.update(alimentId, alimentDTO));
         assertEquals("The given aliment is not yours", exception.getMessage());
         verify(alimentRepository, never()).save(any());
     }
@@ -231,7 +232,7 @@ class AlimentServiceImplTest {
     }
 
     @Test
-    void delete_shouldThrowApiException_whenNotOwned() {
+    void delete_shouldThrowForbiddenException_whenNotOwned() {
         // Arrange
         long alimentId = 1L;
         User user = mock(User.class);
@@ -249,7 +250,7 @@ class AlimentServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
 
         // Act & Assert
-        ApiException exception = assertThrows(ApiException.class, () -> alimentService.delete(alimentId));
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> alimentService.delete(alimentId));
         assertEquals("The given aliment is not yours", exception.getMessage());
         verify(alimentRepository, never()).deleteById(anyLong());
     }
