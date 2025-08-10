@@ -1,11 +1,11 @@
 package com.platydev.compteurcalories.dto.output;
 
-import com.platydev.compteurcalories.dto.PlatDTO;
+import com.platydev.compteurcalories.dto.PlatWithoutRecetteDTO;
 
 import java.util.List;
 
 public record PlatResponse(
-        List<PlatDTO> content,
+        List<PlatWithoutRecetteDTO> content,
         int pageNumber,
         int pageSize,
         long totalElements,
