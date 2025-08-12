@@ -1,6 +1,7 @@
 package com.platydev.compteurcalories.service;
 
-import com.platydev.compteurcalories.dto.AlimentDTO;
+import com.platydev.compteurcalories.dto.input.AlimentInputDTO;
+import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import org.springframework.data.domain.Pageable;
 
@@ -12,9 +13,9 @@ public interface AlimentService {
 
     AlimentDTO findById(long alimentId);
 
-    void add(AlimentDTO alimentDTO);
+    void add(AlimentInputDTO alimentDTO);
 
-    void update(long alimentId, AlimentDTO alimentDTO);
+    void update(long alimentId, AlimentInputDTO alimentDTO);
 
     void delete(long alimentId);
 

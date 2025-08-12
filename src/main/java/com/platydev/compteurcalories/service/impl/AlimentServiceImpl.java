@@ -1,6 +1,7 @@
 package com.platydev.compteurcalories.service.impl;
 
-import com.platydev.compteurcalories.dto.AlimentDTO;
+import com.platydev.compteurcalories.dto.input.AlimentInputDTO;
+import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import com.platydev.compteurcalories.entity.CodeBarre;
@@ -84,7 +85,7 @@ public class AlimentServiceImpl implements AlimentService {
     }
 
     @Override
-    public void add(AlimentDTO alimentDTO) {
+    public void add(AlimentInputDTO alimentDTO) {
         if (existsByName(alimentDTO.nom())) {
             throw new ApiException("This aliment already exists");
         }
@@ -99,7 +100,7 @@ public class AlimentServiceImpl implements AlimentService {
     }
 
     @Override
-    public void update(long alimentId, AlimentDTO alimentDTO) {
+    public void update(long alimentId, AlimentInputDTO alimentDTO) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         existsByIdAndByUser(alimentId, user);
 

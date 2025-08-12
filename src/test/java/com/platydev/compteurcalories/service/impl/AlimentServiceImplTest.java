@@ -1,6 +1,7 @@
 package com.platydev.compteurcalories.service.impl;
 
-import com.platydev.compteurcalories.dto.AlimentDTO;
+import com.platydev.compteurcalories.dto.input.AlimentInputDTO;
+import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import com.platydev.compteurcalories.entity.security.User;
@@ -111,7 +112,7 @@ class AlimentServiceImplTest {
     @Test
     void add_shouldSaveAliment_whenNotExists() {
         // Arrange
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         when(alimentDTO.nom()).thenReturn("test");
         when(alimentRepository.findByNomAndUser(anyString(), any())).thenReturn(Optional.empty());
         User user = mock(User.class);
@@ -135,7 +136,7 @@ class AlimentServiceImplTest {
     @Test
     void add_shouldThrowApiException_whenAlimentExists() {
         // Arrange
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         when(alimentDTO.nom()).thenReturn("test");
         when(alimentRepository.findByNomAndUser(anyString(), any())).thenReturn(Optional.of(new Aliment()));
         User user = mock(User.class);
@@ -157,7 +158,7 @@ class AlimentServiceImplTest {
     void update_shouldUpdateAliment_whenExistsAndOwned() {
         // Arrange
         long alimentId = 1L;
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         User user = mock(User.class);
         Aliment aliment = new Aliment();
         aliment.setUser(user);
@@ -186,7 +187,7 @@ class AlimentServiceImplTest {
     void update_shouldThrowForbiddenException_whenNotOwned() {
         // Arrange
         long alimentId = 1L;
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         User user = mock(User.class);
         User otherUser = mock(User.class);
         Aliment aliment = new Aliment();
