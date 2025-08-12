@@ -31,5 +31,8 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml -DskipTests
 
-      - name: Run tests
+      - name: Run Unit tests
         run: mvn test
+
+      - name: Run Integration tests
+        run: mvn integration-test

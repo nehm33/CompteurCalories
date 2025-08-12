@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-class AlimentServiceImplTest {
+class AlimentServiceImplTests {
 
     @Mock
     private AlimentRepository alimentRepository;

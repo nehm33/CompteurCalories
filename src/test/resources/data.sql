@@ -26,6 +26,8 @@ VALUES (3, 2);
 
 -- Insertion des aliments de test
 -- 5 aliments pour l'admin
+
+-- La pomme rouge sera renommée pomme rouge modifiée
 INSERT INTO aliments (nom, calories, unite, Mat_Gras, Mat_Gras_S, Mat_Gras_MI, 
     Mat_Gras_PI, Mat_Gras_T, proteines, glucides, sucre, fibres, sel, cholesterol, 
     pro_vit_A, vit_A, vit_B1, vit_B2, vit_B3, vit_B5, vit_B6, vit_B8, 
@@ -37,6 +39,7 @@ VALUES ('Pomme Rouge', 52.0, 'g', 0.2, 0.03, 0.01, 0.01, 0.0, 0.3, 14.0, 10.0, 2
     0.0, 0.0, 6.0, 0.0, 0.0, 0.0, 0.0, 0.027, 0.12, 0.0, 0.0, 5.0, 0.035, 0.0, 1.0, 11.0, 107.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.04,
     1);
 
+-- La banane sera supprimée
 INSERT INTO aliments (nom, calories, unite, Mat_Gras, Mat_Gras_S, Mat_Gras_MI, 
     Mat_Gras_PI, Mat_Gras_T, proteines, glucides, sucre, fibres, sel, cholesterol, 
     pro_vit_A, vit_A, vit_B1, vit_B2, vit_B3, vit_B5, vit_B6, vit_B8, 
