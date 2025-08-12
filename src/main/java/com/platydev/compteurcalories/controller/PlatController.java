@@ -1,6 +1,7 @@
 package com.platydev.compteurcalories.controller;
 
-import com.platydev.compteurcalories.dto.PlatDTO;
+import com.platydev.compteurcalories.dto.input.PlatInputDTO;
+import com.platydev.compteurcalories.dto.output.PlatDTO;
 import com.platydev.compteurcalories.dto.output.PlatResponse;
 import com.platydev.compteurcalories.service.PlatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +36,13 @@ public class PlatController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> add(@RequestBody PlatDTO platDTO) {
+    public ResponseEntity<Void> add(@RequestBody PlatInputDTO platDTO) {
         platService.add(platDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/{platId}")
-    public ResponseEntity<Void> update(@PathVariable long platId, @RequestBody PlatDTO platDTO) {
+    public ResponseEntity<Void> update(@PathVariable long platId, @RequestBody PlatInputDTO platDTO) {
         platService.update(platId, platDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
