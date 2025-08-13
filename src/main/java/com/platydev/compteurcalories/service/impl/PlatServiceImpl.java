@@ -23,8 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class PlatServiceImpl implements PlatService {
@@ -75,6 +74,53 @@ public class PlatServiceImpl implements PlatService {
     public void add(PlatInputDTO platDTO) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        // Validation et agrégation des recettes
+        Map<Aliment, Float> alimentsQuantites = validateAndAggregateRecettes(platDTO, currentUser);
+
+        // Création de l'aliment représentant le plat avec calcul des valeurs nutritionnelles
+        Aliment alimentPlat = createAlimentForPlat(platDTO, alimentsQuantites, currentUser);
+
+        // Sauvegarde de l'aliment (cascade vers le plat)
+        Aliment savedAliment = alimentRepository.save(alimentPlat);
+
+        // Création et sauvegarde des recettes
+        saveRecettes(savedAliment.getPlat(), alimentsQuantites);
+    }
+
+    @Override
+    public void update(long platId, PlatInputDTO platDTO) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Plat platExistant = findPlatAndCheckOwnership(platId, currentUser.getId());
+
+        // Validation et agrégation des recettes
+        Map<Aliment, Float> nouvellesRecettes = validateAndAggregateRecettes(platDTO, currentUser);
+
+        // Récupération des recettes existantes du plat
+        List<Recette> recettesExistantes = recetteRepository.findAllByRecetteId_PlatId(platId);
+
+        // Comparaison des recettes : même aliments avec mêmes quantités ?
+        if (areRecettesIdentical(recettesExistantes, nouvellesRecettes)) {
+            // Mise à jour simple : uniquement les données du plat (nom, nbPortions)
+            updatePlatDataOnly(platExistant, platDTO, nouvellesRecettes, currentUser);
+        } else {
+            // Mise à jour complète : suppression des anciennes recettes et recréation
+            updatePlatWithNewRecettes(platExistant, platDTO, nouvellesRecettes, currentUser);
+        }
+    }
+
+    @Override
+    public void delete(long platId) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Plat plat = findPlatAndCheckOwnership(platId, currentUser.getId());
+
+        alimentRepository.deleteById(plat.getAliment().getId());
+    }
+
+    /**
+     * Valide et agrège les recettes d'un PlatInputDTO
+     * Méthode commune utilisée par add() et update()
+     */
+    private Map<Aliment, Float> validateAndAggregateRecettes(PlatInputDTO platDTO, User currentUser) {
         // Validation des données d'entrée
         if (platDTO.recettes() == null || platDTO.recettes().isEmpty()) {
             throw new ApiException("Un plat doit contenir au moins une recette");
@@ -88,8 +134,9 @@ public class PlatServiceImpl implements PlatService {
             throw new ApiException("Le nom du plat est obligatoire");
         }
 
-        // Vérification et récupération des aliments des recettes
-        List<Aliment> alimentsRecettes = new ArrayList<>();
+        // Agrégation des recettes par Aliment avec vérification des accès
+        Map<Aliment, Float> alimentsQuantites = new HashMap<>();
+
         for (RecetteInputDTO recetteDTO : platDTO.recettes()) {
             if (recetteDTO.alimentId() == null) {
                 throw new ApiException("L'ID de l'aliment est obligatoire pour chaque recette");
@@ -99,6 +146,7 @@ public class PlatServiceImpl implements PlatService {
                 throw new ApiException("La quantité doit être supérieure à 0 pour chaque recette");
             }
 
+            // Récupération de l'aliment
             Aliment aliment = alimentRepository.findById(recetteDTO.alimentId())
                     .orElseThrow(() -> new NotFoundException("Aliment avec l'ID " + recetteDTO.alimentId() + " non trouvé"));
 
@@ -107,42 +155,308 @@ public class PlatServiceImpl implements PlatService {
                 throw new ForbiddenException("Vous n'avez pas accès à l'aliment avec l'ID " + recetteDTO.alimentId());
             }
 
-            alimentsRecettes.add(aliment);
+            // Agrégation : additionner les quantités si l'aliment existe déjà
+            alimentsQuantites.merge(aliment, recetteDTO.quantite(), Float::sum);
         }
 
-        // Création de l'aliment représentant le plat avec calcul des valeurs nutritionnelles
-        Aliment alimentPlat = createAlimentForPlat(platDTO, alimentsRecettes, currentUser);
+        return alimentsQuantites;
+    }
 
-        // Sauvegarde de l'aliment (cascade vers le plat)
-        Aliment savedAliment = alimentRepository.save(alimentPlat);
-
-        // Création et sauvegarde des recettes
+    /**
+     * Sauvegarde les recettes associées à un plat
+     * Méthode commune utilisée par add() et updatePlatWithNewRecettes()
+     */
+    private void saveRecettes(Plat plat, Map<Aliment, Float> alimentsQuantites) {
         List<Recette> recettes = new ArrayList<>();
-        for (int i = 0; i < platDTO.recettes().size(); i++) {
-            RecetteInputDTO recetteDTO = platDTO.recettes().get(i);
-            Aliment alimentRecette = alimentsRecettes.get(i);
+        for (Map.Entry<Aliment, Float> entry : alimentsQuantites.entrySet()) {
+            Aliment alimentRecette = entry.getKey();
+            Float quantiteTotale = entry.getValue();
 
-            Recette recette = new Recette(savedAliment.getPlat(), alimentRecette, recetteDTO.quantite());
+            Recette recette = new Recette(plat, alimentRecette, quantiteTotale);
             recettes.add(recette);
         }
 
         recetteRepository.saveAll(recettes);
     }
 
-    @Override
-    public void update(long platId, PlatInputDTO platDTO) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Plat plat = findPlatAndCheckOwnership(platId, currentUser.getId());
+    /**
+     * Calcule les valeurs nutritionnelles d'un plat à partir de ses ingrédients
+     * Méthode commune pour les calculs nutritionnels
+     */
+    private NutrientTotals calculateNutrientTotals(Map<Aliment, Float> alimentsQuantites) {
+        NutrientTotals totals = new NutrientTotals();
 
-        // Implémentation de la mise à jour à venir
+        for (Map.Entry<Aliment, Float> entry : alimentsQuantites.entrySet()) {
+            Aliment aliment = entry.getKey();
+            float quantite = entry.getValue();
+
+            totals.calories += safeMultiply(aliment.getCalories(), quantite / 100f);
+            totals.matieresGrasses += safeMultiply(aliment.getMatieresGrasses(), quantite / 100f);
+            totals.matieresGrassesSatures += safeMultiply(aliment.getMatieresGrassesSatures(), quantite / 100f);
+            totals.matieresGrassesMonoInsaturees += safeMultiply(aliment.getMatieresGrassesMonoInsaturees(), quantite / 100f);
+            totals.matieresGrassesPolyInsaturees += safeMultiply(aliment.getMatieresGrassesPolyInsaturees(), quantite / 100f);
+            totals.matieresGrassesTrans += safeMultiply(aliment.getMatieresGrassesTrans(), quantite / 100f);
+            totals.proteines += safeMultiply(aliment.getProteines(), quantite / 100f);
+            totals.glucides += safeMultiply(aliment.getGlucides(), quantite / 100f);
+            totals.sucre += safeMultiply(aliment.getSucre(), quantite / 100f);
+            totals.fibres += safeMultiply(aliment.getFibres(), quantite / 100f);
+            totals.sel += safeMultiply(aliment.getSel(), quantite / 100f);
+            totals.cholesterol += safeMultiply(aliment.getCholesterol(), quantite / 100f);
+            totals.provitamineA += safeMultiply(aliment.getProvitamineA(), quantite / 100f);
+            totals.vitamineA += safeMultiply(aliment.getVitamineA(), quantite / 100f);
+            totals.vitamineB1 += safeMultiply(aliment.getVitamineB1(), quantite / 100f);
+            totals.vitamineB2 += safeMultiply(aliment.getVitamineB2(), quantite / 100f);
+            totals.vitamineB3 += safeMultiply(aliment.getVitamineB3(), quantite / 100f);
+            totals.vitamineB5 += safeMultiply(aliment.getVitamineB5(), quantite / 100f);
+            totals.vitamineB6 += safeMultiply(aliment.getVitamineB6(), quantite / 100f);
+            totals.vitamineB8 += safeMultiply(aliment.getVitamineB8(), quantite / 100f);
+            totals.vitamineB9 += safeMultiply(aliment.getVitamineB9(), quantite / 100f);
+            totals.vitamineB11 += safeMultiply(aliment.getVitamineB11(), quantite / 100f);
+            totals.vitamineB12 += safeMultiply(aliment.getVitamineB12(), quantite / 100f);
+            totals.vitamineC += safeMultiply(aliment.getVitamineC(), quantite / 100f);
+            totals.vitamineD += safeMultiply(aliment.getVitamineD(), quantite / 100f);
+            totals.vitamineE += safeMultiply(aliment.getVitamineE(), quantite / 100f);
+            totals.vitamineK1 += safeMultiply(aliment.getVitamineK1(), quantite / 100f);
+            totals.vitamineK2 += safeMultiply(aliment.getVitamineK2(), quantite / 100f);
+            totals.ars += safeMultiply(aliment.getArs(), quantite / 100f);
+            totals.b += safeMultiply(aliment.getB(), quantite / 100f);
+            totals.ca += safeMultiply(aliment.getCa(), quantite / 100f);
+            totals.cl += safeMultiply(aliment.getCl(), quantite / 100f);
+            totals.choline += safeMultiply(aliment.getCholine(), quantite / 100f);
+            totals.cr += safeMultiply(aliment.getCr(), quantite / 100f);
+            totals.co += safeMultiply(aliment.getCo(), quantite / 100f);
+            totals.cu += safeMultiply(aliment.getCu(), quantite / 100f);
+            totals.fe += safeMultiply(aliment.getFe(), quantite / 100f);
+            totals.f += safeMultiply(aliment.getF(), quantite / 100f);
+            totals.i += safeMultiply(aliment.getI(), quantite / 100f);
+            totals.mg += safeMultiply(aliment.getMg(), quantite / 100f);
+            totals.mn += safeMultiply(aliment.getMn(), quantite / 100f);
+            totals.mo += safeMultiply(aliment.getMo(), quantite / 100f);
+            totals.na += safeMultiply(aliment.getNa(), quantite / 100f);
+            totals.p += safeMultiply(aliment.getP(), quantite / 100f);
+            totals.k += safeMultiply(aliment.getK(), quantite / 100f);
+            totals.rb += safeMultiply(aliment.getRb(), quantite / 100f);
+            totals.sio += safeMultiply(aliment.getSiO(), quantite / 100f);
+            totals.s += safeMultiply(aliment.getS(), quantite / 100f);
+            totals.se += safeMultiply(aliment.getSe(), quantite / 100f);
+            totals.v += safeMultiply(aliment.getV(), quantite / 100f);
+            totals.sn += safeMultiply(aliment.getSn(), quantite / 100f);
+            totals.zn += safeMultiply(aliment.getZn(), quantite / 100f);
+        }
+
+        return totals;
     }
 
-    @Override
-    public void delete(long platId) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Plat plat = findPlatAndCheckOwnership(platId, currentUser.getId());
+    /**
+     * Crée un aliment représentant le plat avec calcul des valeurs nutritionnelles
+     * Version refactorisée utilisant calculateNutrientTotals()
+     */
+    private Aliment createAlimentForPlat(PlatInputDTO platDTO, Map<Aliment, Float> alimentsQuantites, User user) {
+        float nbPortions = platDTO.nbPortions();
+        NutrientTotals totals = calculateNutrientTotals(alimentsQuantites);
 
-        alimentRepository.deleteById(plat.getAliment().getId());
+        // Création de l'aliment avec les valeurs par portion
+        Aliment alimentPlat = Aliment.builder()
+                .nom(platDTO.nom())
+                .unite("portion")
+                .calories(totals.calories / nbPortions)
+                .matieresGrasses(safeDivide(totals.matieresGrasses, nbPortions))
+                .matieresGrassesSatures(safeDivide(totals.matieresGrassesSatures, nbPortions))
+                .matieresGrassesMonoInsaturees(safeDivide(totals.matieresGrassesMonoInsaturees, nbPortions))
+                .matieresGrassesPolyInsaturees(safeDivide(totals.matieresGrassesPolyInsaturees, nbPortions))
+                .matieresGrassesTrans(safeDivide(totals.matieresGrassesTrans, nbPortions))
+                .proteines(safeDivide(totals.proteines, nbPortions))
+                .glucides(safeDivide(totals.glucides, nbPortions))
+                .sucre(safeDivide(totals.sucre, nbPortions))
+                .fibres(safeDivide(totals.fibres, nbPortions))
+                .sel(safeDivide(totals.sel, nbPortions))
+                .cholesterol(safeDivide(totals.cholesterol, nbPortions))
+                .provitamineA(safeDivide(totals.provitamineA, nbPortions))
+                .vitamineA(safeDivide(totals.vitamineA, nbPortions))
+                .vitamineB1(safeDivide(totals.vitamineB1, nbPortions))
+                .vitamineB2(safeDivide(totals.vitamineB2, nbPortions))
+                .vitamineB3(safeDivide(totals.vitamineB3, nbPortions))
+                .vitamineB5(safeDivide(totals.vitamineB5, nbPortions))
+                .vitamineB6(safeDivide(totals.vitamineB6, nbPortions))
+                .vitamineB8(safeDivide(totals.vitamineB8, nbPortions))
+                .vitamineB9(safeDivide(totals.vitamineB9, nbPortions))
+                .vitamineB11(safeDivide(totals.vitamineB11, nbPortions))
+                .vitamineB12(safeDivide(totals.vitamineB12, nbPortions))
+                .vitamineC(safeDivide(totals.vitamineC, nbPortions))
+                .vitamineD(safeDivide(totals.vitamineD, nbPortions))
+                .vitamineE(safeDivide(totals.vitamineE, nbPortions))
+                .vitamineK1(safeDivide(totals.vitamineK1, nbPortions))
+                .vitamineK2(safeDivide(totals.vitamineK2, nbPortions))
+                .Ars(safeDivide(totals.ars, nbPortions))
+                .B(safeDivide(totals.b, nbPortions))
+                .Ca(safeDivide(totals.ca, nbPortions))
+                .Cl(safeDivide(totals.cl, nbPortions))
+                .choline(safeDivide(totals.choline, nbPortions))
+                .Cr(safeDivide(totals.cr, nbPortions))
+                .Co(safeDivide(totals.co, nbPortions))
+                .Cu(safeDivide(totals.cu, nbPortions))
+                .Fe(safeDivide(totals.fe, nbPortions))
+                .F(safeDivide(totals.f, nbPortions))
+                .I(safeDivide(totals.i, nbPortions))
+                .Mg(safeDivide(totals.mg, nbPortions))
+                .Mn(safeDivide(totals.mn, nbPortions))
+                .Mo(safeDivide(totals.mo, nbPortions))
+                .Na(safeDivide(totals.na, nbPortions))
+                .P(safeDivide(totals.p, nbPortions))
+                .K(safeDivide(totals.k, nbPortions))
+                .Rb(safeDivide(totals.rb, nbPortions))
+                .SiO(safeDivide(totals.sio, nbPortions))
+                .S(safeDivide(totals.s, nbPortions))
+                .Se(safeDivide(totals.se, nbPortions))
+                .V(safeDivide(totals.v, nbPortions))
+                .Sn(safeDivide(totals.sn, nbPortions))
+                .Zn(safeDivide(totals.zn, nbPortions))
+                .user(user)
+                .build();
+
+        // Création du plat associé
+        Plat plat = new Plat();
+        plat.setNbPortions(nbPortions);
+        plat.setAliment(alimentPlat);
+
+        // Association bidirectionnelle
+        alimentPlat.setPlat(plat);
+
+        return alimentPlat;
+    }
+
+    /**
+     * Compare deux maps de recettes pour voir si elles sont identiques
+     */
+    private boolean areRecettesIdentical(List<Recette> existantes, Map<Aliment, Float> nouvelles) {
+        if (existantes.size() != nouvelles.size()) {
+            return false;
+        }
+
+        for (Recette recette : existantes) {
+            Aliment aliment = recette.getAliment();
+            Float quantiteExistante = recette.getQuantite();
+            Float quantiteNouvelle = nouvelles.get(aliment);
+
+            if (quantiteNouvelle == null || !Objects.equals(quantiteExistante, quantiteNouvelle)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Met à jour seulement les données du plat (nom, nbPortions) sans toucher aux recettes
+     */
+    private void updatePlatDataOnly(Plat platExistant, PlatInputDTO platDTO,
+                                    Map<Aliment, Float> alimentsQuantites, User user) {
+
+        Aliment alimentExistant = platExistant.getAliment();
+        alimentExistant.setNom(platDTO.nom());
+
+        if (platExistant.getNbPortions() != platDTO.nbPortions()) {
+            // Mise à jour du nombre de portions
+            platExistant.setNbPortions(platDTO.nbPortions());
+
+            // Recalcul des valeurs nutritionnelles avec le nouveau nombre de portions
+            NutrientTotals totals = calculateNutrientTotals(alimentsQuantites);
+            float nbPortions = platDTO.nbPortions();
+
+            // Mise à jour des propriétés de l'aliment existant
+            updateAlimentWithTotals(alimentExistant, totals, nbPortions);
+        }
+
+        // Sauvegarde
+        alimentRepository.save(alimentExistant);
+    }
+
+    /**
+     * Met à jour le plat avec de nouvelles recettes (suppression + recréation)
+     */
+    private void updatePlatWithNewRecettes(Plat platExistant, PlatInputDTO platDTO,
+                                           Map<Aliment, Float> nouvellesRecettes, User user) {
+
+        // Suppression des anciennes recettes
+        List<Recette> anciennesRecettes = recetteRepository.findAllByRecetteId_PlatId(platExistant.getId());
+        recetteRepository.deleteAll(anciennesRecettes);
+
+        // Mise à jour du nombre de portions
+        platExistant.setNbPortions(platDTO.nbPortions());
+
+        // Recalcul des valeurs nutritionnelles
+        NutrientTotals totals = calculateNutrientTotals(nouvellesRecettes);
+        float nbPortions = platDTO.nbPortions();
+
+        // Mise à jour des propriétés de l'aliment existant
+        Aliment alimentExistant = platExistant.getAliment();
+        alimentExistant.setNom(platDTO.nom());
+        updateAlimentWithTotals(alimentExistant, totals, nbPortions);
+
+        // Sauvegarde de l'aliment modifié
+        alimentRepository.save(alimentExistant);
+
+        // Création des nouvelles recettes
+        saveRecettes(platExistant, nouvellesRecettes);
+    }
+
+    /**
+     * Met à jour un aliment existant avec les nouveaux totaux nutritionnels
+     */
+    private void updateAlimentWithTotals(Aliment alimentExistant,
+                                         NutrientTotals totals, float nbPortions) {
+        alimentExistant.setCalories(totals.calories / nbPortions);
+        alimentExistant.setMatieresGrasses(safeDivide(totals.matieresGrasses, nbPortions));
+        alimentExistant.setMatieresGrassesSatures(safeDivide(totals.matieresGrassesSatures, nbPortions));
+        alimentExistant.setMatieresGrassesMonoInsaturees(safeDivide(totals.matieresGrassesMonoInsaturees, nbPortions));
+        alimentExistant.setMatieresGrassesPolyInsaturees(safeDivide(totals.matieresGrassesPolyInsaturees, nbPortions));
+        alimentExistant.setMatieresGrassesTrans(safeDivide(totals.matieresGrassesTrans, nbPortions));
+        alimentExistant.setProteines(safeDivide(totals.proteines, nbPortions));
+        alimentExistant.setGlucides(safeDivide(totals.glucides, nbPortions));
+        alimentExistant.setSucre(safeDivide(totals.sucre, nbPortions));
+        alimentExistant.setFibres(safeDivide(totals.fibres, nbPortions));
+        alimentExistant.setSel(safeDivide(totals.sel, nbPortions));
+        alimentExistant.setCholesterol(safeDivide(totals.cholesterol, nbPortions));
+        alimentExistant.setProvitamineA(safeDivide(totals.provitamineA, nbPortions));
+        alimentExistant.setVitamineA(safeDivide(totals.vitamineA, nbPortions));
+        alimentExistant.setVitamineB1(safeDivide(totals.vitamineB1, nbPortions));
+        alimentExistant.setVitamineB2(safeDivide(totals.vitamineB2, nbPortions));
+        alimentExistant.setVitamineB3(safeDivide(totals.vitamineB3, nbPortions));
+        alimentExistant.setVitamineB5(safeDivide(totals.vitamineB5, nbPortions));
+        alimentExistant.setVitamineB6(safeDivide(totals.vitamineB6, nbPortions));
+        alimentExistant.setVitamineB8(safeDivide(totals.vitamineB8, nbPortions));
+        alimentExistant.setVitamineB9(safeDivide(totals.vitamineB9, nbPortions));
+        alimentExistant.setVitamineB11(safeDivide(totals.vitamineB11, nbPortions));
+        alimentExistant.setVitamineB12(safeDivide(totals.vitamineB12, nbPortions));
+        alimentExistant.setVitamineC(safeDivide(totals.vitamineC, nbPortions));
+        alimentExistant.setVitamineD(safeDivide(totals.vitamineD, nbPortions));
+        alimentExistant.setVitamineE(safeDivide(totals.vitamineE, nbPortions));
+        alimentExistant.setVitamineK1(safeDivide(totals.vitamineK1, nbPortions));
+        alimentExistant.setVitamineK2(safeDivide(totals.vitamineK2, nbPortions));
+        alimentExistant.setArs(safeDivide(totals.ars, nbPortions));
+        alimentExistant.setB(safeDivide(totals.b, nbPortions));
+        alimentExistant.setCa(safeDivide(totals.ca, nbPortions));
+        alimentExistant.setCl(safeDivide(totals.cl, nbPortions));
+        alimentExistant.setCholine(safeDivide(totals.choline, nbPortions));
+        alimentExistant.setCr(safeDivide(totals.cr, nbPortions));
+        alimentExistant.setCo(safeDivide(totals.co, nbPortions));
+        alimentExistant.setCu(safeDivide(totals.cu, nbPortions));
+        alimentExistant.setFe(safeDivide(totals.fe, nbPortions));
+        alimentExistant.setF(safeDivide(totals.f, nbPortions));
+        alimentExistant.setI(safeDivide(totals.i, nbPortions));
+        alimentExistant.setMg(safeDivide(totals.mg, nbPortions));
+        alimentExistant.setMn(safeDivide(totals.mn, nbPortions));
+        alimentExistant.setMo(safeDivide(totals.mo, nbPortions));
+        alimentExistant.setNa(safeDivide(totals.na, nbPortions));
+        alimentExistant.setP(safeDivide(totals.p, nbPortions));
+        alimentExistant.setK(safeDivide(totals.k, nbPortions));
+        alimentExistant.setRb(safeDivide(totals.rb, nbPortions));
+        alimentExistant.setSiO(safeDivide(totals.sio, nbPortions));
+        alimentExistant.setS(safeDivide(totals.s, nbPortions));
+        alimentExistant.setSe(safeDivide(totals.se, nbPortions));
+        alimentExistant.setV(safeDivide(totals.v, nbPortions));
+        alimentExistant.setSn(safeDivide(totals.sn, nbPortions));
+        alimentExistant.setZn(safeDivide(totals.zn, nbPortions));
     }
 
     /**
@@ -167,196 +481,6 @@ public class PlatServiceImpl implements PlatService {
     }
 
     /**
-     * Crée un aliment représentant le plat avec calcul des valeurs nutritionnelles
-     */
-    private Aliment createAlimentForPlat(PlatInputDTO platDTO, List<Aliment> alimentsRecettes, User user) {
-        float nbPortions = platDTO.nbPortions();
-
-        // Variables pour les calculs
-        float totalCalories = 0f;
-        float totalMatieresGrasses = 0f;
-        float totalMatieresGrassesSatures = 0f;
-        float totalMatieresGrassesMonoInsaturees = 0f;
-        float totalMatieresGrassesPolyInsaturees = 0f;
-        float totalMatieresGrassesTrans = 0f;
-        float totalProteines = 0f;
-        float totalGlucides = 0f;
-        float totalSucre = 0f;
-        float totalFibres = 0f;
-        float totalSel = 0f;
-        float totalCholesterol = 0f;
-        float totalProvitamineA = 0f;
-        float totalVitamineA = 0f;
-        float totalVitamineB1 = 0f;
-        float totalVitamineB2 = 0f;
-        float totalVitamineB3 = 0f;
-        float totalVitamineB5 = 0f;
-        float totalVitamineB6 = 0f;
-        float totalVitamineB8 = 0f;
-        float totalVitamineB9 = 0f;
-        float totalVitamineB11 = 0f;
-        float totalVitamineB12 = 0f;
-        float totalVitamineC = 0f;
-        float totalVitamineD = 0f;
-        float totalVitamineE = 0f;
-        float totalVitamineK1 = 0f;
-        float totalVitamineK2 = 0f;
-        float totalArs = 0f;
-        float totalB = 0f;
-        float totalCa = 0f;
-        float totalCl = 0f;
-        float totalCholine = 0f;
-        float totalCr = 0f;
-        float totalCo = 0f;
-        float totalCu = 0f;
-        float totalFe = 0f;
-        float totalF = 0f;
-        float totalI = 0f;
-        float totalMg = 0f;
-        float totalMn = 0f;
-        float totalMo = 0f;
-        float totalNa = 0f;
-        float totalP = 0f;
-        float totalK = 0f;
-        float totalRb = 0f;
-        float totalSiO = 0f;
-        float totalS = 0f;
-        float totalSe = 0f;
-        float totalV = 0f;
-        float totalSn = 0f;
-        float totalZn = 0f;
-
-        // Calcul des totaux pour chaque nutriment
-        for (int i = 0; i < platDTO.recettes().size(); i++) {
-            RecetteInputDTO recetteDTO = platDTO.recettes().get(i);
-            Aliment aliment = alimentsRecettes.get(i);
-            float quantite = recetteDTO.quantite();
-
-            totalCalories += safeMultiply(aliment.getCalories(), quantite / 100f);
-            totalMatieresGrasses += safeMultiply(aliment.getMatieresGrasses(), quantite / 100f);
-            totalMatieresGrassesSatures += safeMultiply(aliment.getMatieresGrassesSatures(), quantite / 100f);
-            totalMatieresGrassesMonoInsaturees += safeMultiply(aliment.getMatieresGrassesMonoInsaturees(), quantite / 100f);
-            totalMatieresGrassesPolyInsaturees += safeMultiply(aliment.getMatieresGrassesPolyInsaturees(), quantite / 100f);
-            totalMatieresGrassesTrans += safeMultiply(aliment.getMatieresGrassesTrans(), quantite / 100f);
-            totalProteines += safeMultiply(aliment.getProteines(), quantite / 100f);
-            totalGlucides += safeMultiply(aliment.getGlucides(), quantite / 100f);
-            totalSucre += safeMultiply(aliment.getSucre(), quantite / 100f);
-            totalFibres += safeMultiply(aliment.getFibres(), quantite / 100f);
-            totalSel += safeMultiply(aliment.getSel(), quantite / 100f);
-            totalCholesterol += safeMultiply(aliment.getCholesterol(), quantite / 100f);
-            totalProvitamineA += safeMultiply(aliment.getProvitamineA(), quantite / 100f);
-            totalVitamineA += safeMultiply(aliment.getVitamineA(), quantite / 100f);
-            totalVitamineB1 += safeMultiply(aliment.getVitamineB1(), quantite / 100f);
-            totalVitamineB2 += safeMultiply(aliment.getVitamineB2(), quantite / 100f);
-            totalVitamineB3 += safeMultiply(aliment.getVitamineB3(), quantite / 100f);
-            totalVitamineB5 += safeMultiply(aliment.getVitamineB5(), quantite / 100f);
-            totalVitamineB6 += safeMultiply(aliment.getVitamineB6(), quantite / 100f);
-            totalVitamineB8 += safeMultiply(aliment.getVitamineB8(), quantite / 100f);
-            totalVitamineB9 += safeMultiply(aliment.getVitamineB9(), quantite / 100f);
-            totalVitamineB11 += safeMultiply(aliment.getVitamineB11(), quantite / 100f);
-            totalVitamineB12 += safeMultiply(aliment.getVitamineB12(), quantite / 100f);
-            totalVitamineC += safeMultiply(aliment.getVitamineC(), quantite / 100f);
-            totalVitamineD += safeMultiply(aliment.getVitamineD(), quantite / 100f);
-            totalVitamineE += safeMultiply(aliment.getVitamineE(), quantite / 100f);
-            totalVitamineK1 += safeMultiply(aliment.getVitamineK1(), quantite / 100f);
-            totalVitamineK2 += safeMultiply(aliment.getVitamineK2(), quantite / 100f);
-            totalArs += safeMultiply(aliment.getArs(), quantite / 100f);
-            totalB += safeMultiply(aliment.getB(), quantite / 100f);
-            totalCa += safeMultiply(aliment.getCa(), quantite / 100f);
-            totalCl += safeMultiply(aliment.getCl(), quantite / 100f);
-            totalCholine += safeMultiply(aliment.getCholine(), quantite / 100f);
-            totalCr += safeMultiply(aliment.getCr(), quantite / 100f);
-            totalCo += safeMultiply(aliment.getCo(), quantite / 100f);
-            totalCu += safeMultiply(aliment.getCu(), quantite / 100f);
-            totalFe += safeMultiply(aliment.getFe(), quantite / 100f);
-            totalF += safeMultiply(aliment.getF(), quantite / 100f);
-            totalI += safeMultiply(aliment.getI(), quantite / 100f);
-            totalMg += safeMultiply(aliment.getMg(), quantite / 100f);
-            totalMn += safeMultiply(aliment.getMn(), quantite / 100f);
-            totalMo += safeMultiply(aliment.getMo(), quantite / 100f);
-            totalNa += safeMultiply(aliment.getNa(), quantite / 100f);
-            totalP += safeMultiply(aliment.getP(), quantite / 100f);
-            totalK += safeMultiply(aliment.getK(), quantite / 100f);
-            totalRb += safeMultiply(aliment.getRb(), quantite / 100f);
-            totalSiO += safeMultiply(aliment.getSiO(), quantite / 100f);
-            totalS += safeMultiply(aliment.getS(), quantite / 100f);
-            totalSe += safeMultiply(aliment.getSe(), quantite / 100f);
-            totalV += safeMultiply(aliment.getV(), quantite / 100f);
-            totalSn += safeMultiply(aliment.getSn(), quantite / 100f);
-            totalZn += safeMultiply(aliment.getZn(), quantite / 100f);
-        }
-
-        // Création de l'aliment avec les valeurs par portion
-        Aliment alimentPlat = Aliment.builder()
-                .nom(platDTO.nom())
-                .unite("portion")
-                .calories(totalCalories / nbPortions)
-                .matieresGrasses(safeDivide(totalMatieresGrasses, nbPortions))
-                .matieresGrassesSatures(safeDivide(totalMatieresGrassesSatures, nbPortions))
-                .matieresGrassesMonoInsaturees(safeDivide(totalMatieresGrassesMonoInsaturees, nbPortions))
-                .matieresGrassesPolyInsaturees(safeDivide(totalMatieresGrassesPolyInsaturees, nbPortions))
-                .matieresGrassesTrans(safeDivide(totalMatieresGrassesTrans, nbPortions))
-                .proteines(safeDivide(totalProteines, nbPortions))
-                .glucides(safeDivide(totalGlucides, nbPortions))
-                .sucre(safeDivide(totalSucre, nbPortions))
-                .fibres(safeDivide(totalFibres, nbPortions))
-                .sel(safeDivide(totalSel, nbPortions))
-                .cholesterol(safeDivide(totalCholesterol, nbPortions))
-                .provitamineA(safeDivide(totalProvitamineA, nbPortions))
-                .vitamineA(safeDivide(totalVitamineA, nbPortions))
-                .vitamineB1(safeDivide(totalVitamineB1, nbPortions))
-                .vitamineB2(safeDivide(totalVitamineB2, nbPortions))
-                .vitamineB3(safeDivide(totalVitamineB3, nbPortions))
-                .vitamineB5(safeDivide(totalVitamineB5, nbPortions))
-                .vitamineB6(safeDivide(totalVitamineB6, nbPortions))
-                .vitamineB8(safeDivide(totalVitamineB8, nbPortions))
-                .vitamineB9(safeDivide(totalVitamineB9, nbPortions))
-                .vitamineB11(safeDivide(totalVitamineB11, nbPortions))
-                .vitamineB12(safeDivide(totalVitamineB12, nbPortions))
-                .vitamineC(safeDivide(totalVitamineC, nbPortions))
-                .vitamineD(safeDivide(totalVitamineD, nbPortions))
-                .vitamineE(safeDivide(totalVitamineE, nbPortions))
-                .vitamineK1(safeDivide(totalVitamineK1, nbPortions))
-                .vitamineK2(safeDivide(totalVitamineK2, nbPortions))
-                .Ars(safeDivide(totalArs, nbPortions))
-                .B(safeDivide(totalB, nbPortions))
-                .Ca(safeDivide(totalCa, nbPortions))
-                .Cl(safeDivide(totalCl, nbPortions))
-                .choline(safeDivide(totalCholine, nbPortions))
-                .Cr(safeDivide(totalCr, nbPortions))
-                .Co(safeDivide(totalCo, nbPortions))
-                .Cu(safeDivide(totalCu, nbPortions))
-                .Fe(safeDivide(totalFe, nbPortions))
-                .F(safeDivide(totalF, nbPortions))
-                .I(safeDivide(totalI, nbPortions))
-                .Mg(safeDivide(totalMg, nbPortions))
-                .Mn(safeDivide(totalMn, nbPortions))
-                .Mo(safeDivide(totalMo, nbPortions))
-                .Na(safeDivide(totalNa, nbPortions))
-                .P(safeDivide(totalP, nbPortions))
-                .K(safeDivide(totalK, nbPortions))
-                .Rb(safeDivide(totalRb, nbPortions))
-                .SiO(safeDivide(totalSiO, nbPortions))
-                .S(safeDivide(totalS, nbPortions))
-                .Se(safeDivide(totalSe, nbPortions))
-                .V(safeDivide(totalV, nbPortions))
-                .Sn(safeDivide(totalSn, nbPortions))
-                .Zn(safeDivide(totalZn, nbPortions))
-                .user(user)
-                .build();
-
-        // Création du plat associé
-        Plat plat = new Plat();
-        plat.setNbPortions(nbPortions);
-        plat.setAliment(alimentPlat);
-
-        // Association bidirectionnelle
-        alimentPlat.setPlat(plat);
-
-        return alimentPlat;
-    }
-
-    /**
      * Multiplie deux valeurs Float en gérant les valeurs null
      */
     private float safeMultiply(Float value, float multiplier) {
@@ -371,5 +495,63 @@ public class PlatServiceImpl implements PlatService {
             return null;
         }
         return value / divisor;
+    }
+
+    /**
+     * Classe interne pour regrouper les totaux nutritionnels
+     */
+    private static class NutrientTotals {
+        float calories = 0f;
+        float matieresGrasses = 0f;
+        float matieresGrassesSatures = 0f;
+        float matieresGrassesMonoInsaturees = 0f;
+        float matieresGrassesPolyInsaturees = 0f;
+        float matieresGrassesTrans = 0f;
+        float proteines = 0f;
+        float glucides = 0f;
+        float sucre = 0f;
+        float fibres = 0f;
+        float sel = 0f;
+        float cholesterol = 0f;
+        float provitamineA = 0f;
+        float vitamineA = 0f;
+        float vitamineB1 = 0f;
+        float vitamineB2 = 0f;
+        float vitamineB3 = 0f;
+        float vitamineB5 = 0f;
+        float vitamineB6 = 0f;
+        float vitamineB8 = 0f;
+        float vitamineB9 = 0f;
+        float vitamineB11 = 0f;
+        float vitamineB12 = 0f;
+        float vitamineC = 0f;
+        float vitamineD = 0f;
+        float vitamineE = 0f;
+        float vitamineK1 = 0f;
+        float vitamineK2 = 0f;
+        float ars = 0f;
+        float b = 0f;
+        float ca = 0f;
+        float cl = 0f;
+        float choline = 0f;
+        float cr = 0f;
+        float co = 0f;
+        float cu = 0f;
+        float fe = 0f;
+        float f = 0f;
+        float i = 0f;
+        float mg = 0f;
+        float mn = 0f;
+        float mo = 0f;
+        float na = 0f;
+        float p = 0f;
+        float k = 0f;
+        float rb = 0f;
+        float sio = 0f;
+        float s = 0f;
+        float se = 0f;
+        float v = 0f;
+        float sn = 0f;
+        float zn = 0f;
     }
 }
