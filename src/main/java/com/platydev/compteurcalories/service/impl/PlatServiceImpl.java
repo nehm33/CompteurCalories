@@ -17,6 +17,7 @@ import com.platydev.compteurcalories.repository.AlimentRepository;
 import com.platydev.compteurcalories.repository.PlatRepository;
 import com.platydev.compteurcalories.repository.RecetteRepository;
 import com.platydev.compteurcalories.service.PlatService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,7 +72,7 @@ public class PlatServiceImpl implements PlatService {
     }
 
     @Override
-    public void add(PlatInputDTO platDTO) {
+    public void add(@Valid PlatInputDTO platDTO) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Validation et agrégation des recettes
@@ -88,7 +89,7 @@ public class PlatServiceImpl implements PlatService {
     }
 
     @Override
-    public void update(long platId, PlatInputDTO platDTO) {
+    public void update(long platId, @Valid PlatInputDTO platDTO) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Plat platExistant = findPlatAndCheckOwnership(platId, currentUser.getId());
 
@@ -119,33 +120,13 @@ public class PlatServiceImpl implements PlatService {
     /**
      * Valide et agrège les recettes d'un PlatInputDTO
      * Méthode commune utilisée par add() et update()
+     * Note: Les validations de base (non null, > 0) sont maintenant gérées par les annotations @Valid
      */
     private Map<Aliment, Float> validateAndAggregateRecettes(PlatInputDTO platDTO, User currentUser) {
-        // Validation des données d'entrée
-        if (platDTO.recettes() == null || platDTO.recettes().isEmpty()) {
-            throw new ApiException("Un plat doit contenir au moins une recette");
-        }
-
-        if (platDTO.nbPortions() == null || platDTO.nbPortions() <= 0) {
-            throw new ApiException("Le nombre de portions doit être supérieur à 0");
-        }
-
-        if (platDTO.nom() == null || platDTO.nom().trim().isEmpty()) {
-            throw new ApiException("Le nom du plat est obligatoire");
-        }
-
         // Agrégation des recettes par Aliment avec vérification des accès
         Map<Aliment, Float> alimentsQuantites = new HashMap<>();
 
         for (RecetteInputDTO recetteDTO : platDTO.recettes()) {
-            if (recetteDTO.alimentId() == null) {
-                throw new ApiException("L'ID de l'aliment est obligatoire pour chaque recette");
-            }
-
-            if (recetteDTO.quantite() == null || recetteDTO.quantite() <= 0) {
-                throw new ApiException("La quantité doit être supérieure à 0 pour chaque recette");
-            }
-
             // Récupération de l'aliment
             Aliment aliment = alimentRepository.findById(recetteDTO.alimentId())
                     .orElseThrow(() -> new NotFoundException("Aliment avec l'ID " + recetteDTO.alimentId() + " non trouvé"));
@@ -153,6 +134,11 @@ public class PlatServiceImpl implements PlatService {
             // Vérifier que l'utilisateur a accès à cet aliment
             if (!aliment.getUser().equals(currentUser) && aliment.getUser().getId() != 1L) {
                 throw new ForbiddenException("Vous n'avez pas accès à l'aliment avec l'ID " + recetteDTO.alimentId());
+            }
+
+            // Vérifier que ce n'est pas un plat (on ne peut pas mettre un plat dans un plat)
+            if (aliment.getPlat() != null) {
+                throw new ApiException("Impossible d'utiliser un plat comme ingrédient d'un autre plat (ID: " + recetteDTO.alimentId() + ")");
             }
 
             // Agrégation : additionner les quantités si l'aliment existe déjà

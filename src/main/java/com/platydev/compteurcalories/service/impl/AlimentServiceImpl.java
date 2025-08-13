@@ -13,6 +13,7 @@ import com.platydev.compteurcalories.infrastructure.AlimentMapper;
 import com.platydev.compteurcalories.repository.AlimentRepository;
 import com.platydev.compteurcalories.repository.CodeBarreRepository;
 import com.platydev.compteurcalories.service.AlimentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,11 +41,11 @@ public class AlimentServiceImpl implements AlimentService {
 
     @Override
     public AlimentResponse getAll(Pageable pageable) {
-        Page<Aliment> alimentPage = alimentRepository.findAll(pageable);
+        Page<Aliment> alimentPage = alimentRepository.findAllByPlatIsNull(pageable);
 
         List<Aliment> aliments = alimentPage.getContent();
         if (aliments.isEmpty()) {
-            throw new ApiException("No aliment created until now");
+            throw new ApiException("Aucun aliment créé jusqu'à maintenant");
         }
         List<AlimentDTO> alimentDTOS = aliments.stream()
                 .map(alimentMapper::toDTO)
@@ -75,19 +76,25 @@ public class AlimentServiceImpl implements AlimentService {
     public AlimentDTO findById(long alimentId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Aliment aliment = alimentRepository.findById(alimentId).orElseThrow(() -> new NotFoundException("Aliment with id " + alimentId + " not found"));
+        Aliment aliment = alimentRepository.findById(alimentId)
+                .orElseThrow(() -> new NotFoundException("Aliment avec l'ID " + alimentId + " non trouvé"));
+
+        // Vérifier que ce n'est pas un plat
+        if (aliment.getPlat() != null) {
+            throw new ApiException("L'ID fourni correspond à un plat, pas à un aliment");
+        }
 
         if (!aliment.getUser().equals(user) && aliment.getUser().getId() != 1L) {
-            throw new ForbiddenException("The given aliment is not yours");
+            throw new ForbiddenException("Cet aliment ne vous appartient pas");
         }
 
         return alimentMapper.toDTO(aliment);
     }
 
     @Override
-    public void add(AlimentInputDTO alimentDTO) {
+    public void add(@Valid AlimentInputDTO alimentDTO) {
         if (existsByName(alimentDTO.nom())) {
-            throw new ApiException("This aliment already exists");
+            throw new ApiException("Cet aliment existe déjà");
         }
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -100,7 +107,7 @@ public class AlimentServiceImpl implements AlimentService {
     }
 
     @Override
-    public void update(long alimentId, AlimentInputDTO alimentDTO) {
+    public void update(long alimentId, @Valid AlimentInputDTO alimentDTO) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         existsByIdAndByUser(alimentId, user);
 
@@ -130,16 +137,31 @@ public class AlimentServiceImpl implements AlimentService {
     @Override
     public boolean existsByName(String alimentName) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Aliment> alimentOptional = alimentRepository.findByNomAndUser(alimentName, user);
+        Optional<Aliment> alimentOptional = alimentRepository.findByNomAndUserAndPlatIsNull(alimentName, user);
         return alimentOptional.isPresent();
     }
 
+
+
+    /**
+     * Vérifie qu'un aliment existe, appartient à l'utilisateur et n'est pas un plat
+     * @param alimentId l'ID de l'aliment à vérifier
+     * @param user l'utilisateur connecté
+     * @throws NotFoundException si l'aliment n'existe pas
+     * @throws ForbiddenException si l'aliment n'appartient pas à l'utilisateur
+     * @throws ApiException si l'ID correspond à un plat
+     */
     private void existsByIdAndByUser(long alimentId, User user) {
         Aliment aliment = alimentRepository.findById(alimentId)
-                .orElseThrow(() -> new NotFoundException("Aliment with id " + alimentId+ " not found"));
+                .orElseThrow(() -> new NotFoundException("Aliment avec l'ID " + alimentId + " non trouvé"));
+
+        // Vérifier que ce n'est pas un plat
+        if (aliment.getPlat() != null) {
+            throw new ApiException("L'ID fourni correspond à un plat, pas à un aliment");
+        }
 
         if (!user.equals(aliment.getUser())) {
-            throw new ForbiddenException("The given aliment is not yours");
+            throw new ForbiddenException("Cet aliment ne vous appartient pas");
         }
     }
 }
