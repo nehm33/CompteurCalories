@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -14,11 +13,13 @@ import java.util.Optional;
 @Repository
 public interface AlimentRepository extends JpaRepository<Aliment, Long> {
 
-    @Query("SELECT a FROM Aliment a LEFT JOIN a.codeBarre cb WHERE (a.user = :user OR a.user.id = 1) AND (a.nom LIKE :pattern OR cb.codeBarre LIKE :pattern)")
-    Page<Aliment> findUserAlimentsByNomOrCodeBarre(Pageable pageable, @Param("pattern") String pattern, @Param("user") User user);
+    Page<Aliment> findAllByPlatIsNull(Pageable pageable);
 
-    @Query("SELECT a FROM Aliment a WHERE a.user = :user OR a.user.id = 1")
-    Page<Aliment> findUserAliments(Pageable pageable, @Param("user") User user);
+    @Query("SELECT a FROM Aliment a LEFT JOIN a.codeBarre cb LEFT JOIN a.plat p WHERE (a.user = :user OR a.user.id = 1) AND (a.nom LIKE :search OR cb.codeBarre LIKE :search) AND p IS NULL")
+    Page<Aliment> findUserAlimentsByNomOrCodeBarre(Pageable pageable, String search, User user);
 
-    Optional<Aliment> findByNomAndUser(String nom, User user);
+    @Query("SELECT a FROM Aliment a LEFT JOIN a.plat p WHERE (a.user = :user OR a.user.id = 1) AND p IS NULL")
+    Page<Aliment> findUserAliments(Pageable pageable, User user);
+
+    Optional<Aliment> findByNomAndUserAndPlatIsNull(String nom, User user);
 }

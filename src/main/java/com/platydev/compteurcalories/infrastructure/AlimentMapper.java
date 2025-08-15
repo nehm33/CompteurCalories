@@ -1,6 +1,7 @@
 package com.platydev.compteurcalories.infrastructure;
 
-import com.platydev.compteurcalories.dto.AlimentDTO;
+import com.platydev.compteurcalories.dto.input.AlimentInputDTO;
+import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import org.mapstruct.Mapper;
@@ -26,5 +27,5 @@ public interface AlimentMapper {
     AlimentResponse toAlimentResponse(List<AlimentDTO> alimentDTOS, Page<Aliment> page);
 
     @Mapping(target = "codeBarre", expression = "java(alimentDTO.codeBarre() != null ? new com.platydev.compteurcalories.entity.CodeBarre(alimentDTO.codeBarre(), alimentDTO.marque(), null) : null)")
-    Aliment toEntity(AlimentDTO alimentDTO);
+    Aliment toEntity(AlimentInputDTO alimentDTO);
 }

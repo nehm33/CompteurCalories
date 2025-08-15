@@ -1,6 +1,7 @@
 package com.platydev.compteurcalories.service.impl;
 
-import com.platydev.compteurcalories.dto.AlimentDTO;
+import com.platydev.compteurcalories.dto.input.AlimentInputDTO;
+import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
 import com.platydev.compteurcalories.entity.security.User;
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-class AlimentServiceImplTest {
+class AlimentServiceImplTests {
 
     @Mock
     private AlimentRepository alimentRepository;
@@ -52,7 +53,7 @@ class AlimentServiceImplTest {
         List<AlimentDTO> alimentDTOS = List.of(mock(AlimentDTO.class));
         AlimentResponse response = mock(AlimentResponse.class);
 
-        when(alimentRepository.findAll(any(Pageable.class))).thenReturn(page);
+        when(alimentRepository.findAllByPlatIsNull(any(Pageable.class))).thenReturn(page);
         when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.getFirst());
         when(alimentMapper.toAlimentResponse(any(), any())).thenReturn(response);
         // Act
@@ -60,7 +61,7 @@ class AlimentServiceImplTest {
 
         // Assert
         assertEquals(response, result);
-        verify(alimentRepository).findAll(any(Pageable.class));
+        verify(alimentRepository).findAllByPlatIsNull(any(Pageable.class));
         verify(alimentMapper).toDTO(any(Aliment.class));
     }
 
@@ -69,14 +70,14 @@ class AlimentServiceImplTest {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("nom")));
         Page<Aliment> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(alimentRepository.findAll(any(Pageable.class))).thenReturn(emptyPage);
+        when(alimentRepository.findAllByPlatIsNull(any(Pageable.class))).thenReturn(emptyPage);
 
         // Act & Assert
         ApiException exception = assertThrows(ApiException.class, () ->
                 alimentService.getAll(pageable)
         );
-        assertEquals("No aliment created until now", exception.getMessage());
-        verify(alimentRepository).findAll(any(Pageable.class));
+        assertEquals("Aucun aliment créé jusqu'à maintenant", exception.getMessage());
+        verify(alimentRepository).findAllByPlatIsNull(any(Pageable.class));
         verifyNoInteractions(alimentMapper);
     }
 
@@ -111,9 +112,9 @@ class AlimentServiceImplTest {
     @Test
     void add_shouldSaveAliment_whenNotExists() {
         // Arrange
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         when(alimentDTO.nom()).thenReturn("test");
-        when(alimentRepository.findByNomAndUser(anyString(), any())).thenReturn(Optional.empty());
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(anyString(), any())).thenReturn(Optional.empty());
         User user = mock(User.class);
         Aliment aliment = new Aliment();
         when(alimentMapper.toEntity(alimentDTO)).thenReturn(aliment);
@@ -135,9 +136,9 @@ class AlimentServiceImplTest {
     @Test
     void add_shouldThrowApiException_whenAlimentExists() {
         // Arrange
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         when(alimentDTO.nom()).thenReturn("test");
-        when(alimentRepository.findByNomAndUser(anyString(), any())).thenReturn(Optional.of(new Aliment()));
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(anyString(), any())).thenReturn(Optional.of(new Aliment()));
         User user = mock(User.class);
         
         // Mock SecurityContext
@@ -149,7 +150,7 @@ class AlimentServiceImplTest {
 
         // Act & Assert
         ApiException exception = assertThrows(ApiException.class, () -> alimentService.add(alimentDTO));
-        assertEquals("This aliment already exists", exception.getMessage());
+        assertEquals("Cet aliment existe déjà", exception.getMessage());
         verify(alimentRepository, never()).save(any());
     }
 
@@ -157,7 +158,7 @@ class AlimentServiceImplTest {
     void update_shouldUpdateAliment_whenExistsAndOwned() {
         // Arrange
         long alimentId = 1L;
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         User user = mock(User.class);
         Aliment aliment = new Aliment();
         aliment.setUser(user);
@@ -186,7 +187,7 @@ class AlimentServiceImplTest {
     void update_shouldThrowForbiddenException_whenNotOwned() {
         // Arrange
         long alimentId = 1L;
-        AlimentDTO alimentDTO = mock(AlimentDTO.class);
+        AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         User user = mock(User.class);
         User otherUser = mock(User.class);
         Aliment aliment = new Aliment();
@@ -203,7 +204,7 @@ class AlimentServiceImplTest {
 
         // Act & Assert
         ForbiddenException exception = assertThrows(ForbiddenException.class, () -> alimentService.update(alimentId, alimentDTO));
-        assertEquals("The given aliment is not yours", exception.getMessage());
+        assertEquals("Cet aliment ne vous appartient pas", exception.getMessage());
         verify(alimentRepository, never()).save(any());
     }
 
@@ -251,7 +252,7 @@ class AlimentServiceImplTest {
 
         // Act & Assert
         ForbiddenException exception = assertThrows(ForbiddenException.class, () -> alimentService.delete(alimentId));
-        assertEquals("The given aliment is not yours", exception.getMessage());
+        assertEquals("Cet aliment ne vous appartient pas", exception.getMessage());
         verify(alimentRepository, never()).deleteById(anyLong());
     }
 
@@ -260,7 +261,7 @@ class AlimentServiceImplTest {
         // Arrange
         String alimentName = "test";
         User user = mock(User.class);
-        when(alimentRepository.findByNomAndUser(eq(alimentName), eq(user))).thenReturn(Optional.of(new Aliment()));
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(eq(alimentName), eq(user))).thenReturn(Optional.of(new Aliment()));
         
         // Mock SecurityContext
         Authentication authentication = mock(Authentication.class);
@@ -281,7 +282,7 @@ class AlimentServiceImplTest {
         // Arrange
         String alimentName = "test";
         User user = mock(User.class);
-        when(alimentRepository.findByNomAndUser(eq(alimentName), eq(user))).thenReturn(Optional.empty());
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(eq(alimentName), eq(user))).thenReturn(Optional.empty());
         
         // Mock SecurityContext
         Authentication authentication = mock(Authentication.class);

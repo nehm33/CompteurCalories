@@ -13,12 +13,14 @@ import java.util.List;
 @Entity
 @Table(name = "aliments")
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Aliment {
 
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -30,7 +32,7 @@ public class Aliment {
     private Float calories;
 
     @NotBlank
-    @Size(max = 2)
+    @Size(max = 7)
     private String unite;
 
     @Column(name = "Mat_Gras")
@@ -208,27 +210,22 @@ public class Aliment {
     private Float Zn;
 
     @OneToOne(mappedBy = "aliment", cascade = CascadeType.ALL)
-    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private CodeBarre codeBarre;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private User user;
 
     @OneToOne(mappedBy = "aliment", cascade = CascadeType.ALL)
-    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Plat plat;
 
     @OneToMany(mappedBy = "aliment", cascade = CascadeType.ALL)
-    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private List<Recette> recettes;
 
     @OneToMany(mappedBy = "aliment", cascade = CascadeType.ALL)
-    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private List<JournalAliment> journalAlimentList;
 }
