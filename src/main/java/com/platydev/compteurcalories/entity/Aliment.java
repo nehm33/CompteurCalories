@@ -32,7 +32,7 @@ public class Aliment {
     private Float calories;
 
     @NotBlank
-    @Size(max = 2)
+    @Size(max = 7)
     private String unite;
 
     @Column(name = "Mat_Gras")

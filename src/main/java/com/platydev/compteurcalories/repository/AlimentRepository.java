@@ -18,7 +18,7 @@ public interface AlimentRepository extends JpaRepository<Aliment, Long> {
     @Query("SELECT a FROM Aliment a LEFT JOIN a.codeBarre cb LEFT JOIN a.plat p WHERE (a.user = :user OR a.user.id = 1) AND (a.nom LIKE :search OR cb.codeBarre LIKE :search) AND p IS NULL")
     Page<Aliment> findUserAlimentsByNomOrCodeBarre(Pageable pageable, String search, User user);
 
-    @Query("SELECT a FROM Aliment a LEFT JOIN a.plat p WHERE a.user = :user OR a.user.id = 1 AND p IS NULL")
+    @Query("SELECT a FROM Aliment a LEFT JOIN a.plat p WHERE (a.user = :user OR a.user.id = 1) AND p IS NULL")
     Page<Aliment> findUserAliments(Pageable pageable, User user);
 
     Optional<Aliment> findByNomAndUserAndPlatIsNull(String nom, User user);

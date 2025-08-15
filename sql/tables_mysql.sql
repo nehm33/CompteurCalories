@@ -22,7 +22,7 @@ CREATE TABLE aliments (
     nom VARCHAR(100) NOT NULL,
     user_id BIGINT REFERENCES utilisateurs ON UPDATE CASCADE ON DELETE CASCADE,
     calories FLOAT(23) NOT NULL,
-    unite VARCHAR(2) DEFAULT 'g',
+    unite VARCHAR(7) DEFAULT 'g',
     glucides FLOAT(23) NOT NULL,
     sucre FLOAT(23),
     fibres FLOAT(23),

@@ -84,8 +84,8 @@ class AlimentControllerIntegrationTests {
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().content());
         
-        // Vérifier que testuser voit ses 3 aliments + 5 aliments de l'admin = 8 total
-        assertEquals(8, response.getBody().content().size());
+        // Vérifier que testuser voit ses 3 aliments + 6 aliments de l'admin = 8 total
+        assertEquals(9, response.getBody().content().size());
         
         // Vérifier quelques noms des aliments (triés par nom)
         assertTrue(response.getBody().content().stream()
@@ -117,8 +117,8 @@ class AlimentControllerIntegrationTests {
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().content());
         
-        // L'admin voit ses 5 aliments + ses propres aliments en tant qu'admin = 5 aliments
-        assertEquals(5, response.getBody().content().size());
+        // L'admin voit ses 6 aliments
+        assertEquals(6, response.getBody().content().size());
     }
 
     @Test
@@ -142,8 +142,8 @@ class AlimentControllerIntegrationTests {
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().content());
         
-        // Vérifier que user2 voit ses 2 aliments + 5 aliments de l'admin = 7 total
-        assertEquals(7, response.getBody().content().size());
+        // Vérifier que user2 voit ses 2 aliments + 6 aliments de l'admin = 8 total
+        assertEquals(8, response.getBody().content().size());
         
         // Vérifier la présence d'aliments de user2 et de l'admin
         assertTrue(response.getBody().content().stream()
@@ -244,8 +244,8 @@ class AlimentControllerIntegrationTests {
         
         assertEquals(HttpStatus.OK, getResponse.getStatusCode());
         assertNotNull(getResponse.getBody());
-        // Maintenant testuser devrait avoir 9 aliments (3 siens + 5 admin + 1 nouveau).
-        assertEquals(9, getResponse.getBody().content().size());
+        // Maintenant testuser devrait avoir 9 aliments (3 siens + 6 admin + 1 nouveau).
+        assertEquals(10, getResponse.getBody().content().size());
         
         // Vérifier que le nouvel aliment est présent
         assertTrue(getResponse.getBody().content().stream()
@@ -376,7 +376,7 @@ class AlimentControllerIntegrationTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().content().size());
-        assertEquals(5, response.getBody().totalElements());
+        assertEquals(6, response.getBody().totalElements());
         assertEquals(3, response.getBody().totalPages());
         assertFalse(response.getBody().lastPage());
     }
@@ -568,8 +568,8 @@ class AlimentControllerIntegrationTests {
 
         assertNotNull(getResponse.getBody());
         assertFalse(getResponse.getBody().content().isEmpty());
-        // Pour cet exemple, on suppose que l'ID est 100 (à adapter selon votre logique).
-        long alimentId = 13L; // À remplacer par la logique réelle pour récupérer l'ID
+
+        long alimentId = getResponse.getBody().content().getFirst().id();
 
         // Préparer les données de mise à jour
         AlimentDTO alimentDTOUpdate = AlimentDTO.builder()
@@ -748,7 +748,7 @@ class AlimentControllerIntegrationTests {
         int countBefore = beforeResponse.getBody().content().size();
 
         // Supposons que l'aliment créé a l'ID 101
-        long alimentId = 14L;
+        long alimentId = 22L;
 
         // Act
         ResponseEntity<Void> response = restTemplate.exchange(
@@ -797,8 +797,8 @@ class AlimentControllerIntegrationTests {
         assertNotNull(beforeResponse.getBody());
         int countBefore = beforeResponse.getBody().content().size();
 
-        // Supposons que l'admin supprime l'aliment "Banane" avec l'ID 2
-        long alimentId = 2L;
+        // Supposons que l'admin supprime l'aliment "Banane à supprimer" avec l'ID 2
+        long alimentId = 11L;
 
         // Act
         ResponseEntity<Void> response = restTemplate.exchange(
