@@ -71,14 +71,15 @@ class UserServiceImplTests {
         // Arrange
         String username = "testuser";
         String password = "password";
+        String hashedPassword = "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi";
         String token = "jwt-token";
         int expiration = 7200;
-        
+
         LoginInput loginInput = new LoginInput(username, password);
-        User user = mock(User.class);
+        User user = User.builder().username(username).password(hashedPassword).build();
         LoginOutput expectedOutput = new LoginOutput(token, expiration);
-        
-        when(userRepository.findByUsernameAndPassword(username, password)).thenReturn(Optional.of(user));
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         when(jwtUtils.generateTokenFromUsername(user)).thenReturn(token);
         when(jwtUtils.getJwtExpiration()).thenReturn(expiration);
 
@@ -87,37 +88,58 @@ class UserServiceImplTests {
 
         // Assert
         assertEquals(expectedOutput, result);
-        verify(userRepository).findByUsernameAndPassword(username, password);
+        verify(userRepository).findByUsername(username);
         verify(jwtUtils).generateTokenFromUsername(user);
         verify(jwtUtils).getJwtExpiration();
     }
 
     @Test
-    void authenticate_shouldThrowUsernameNotFoundException_whenCredentialsAreInvalid() {
+    void authenticate_shouldThrowUsernameNotFoundException_whenUserDoesNotExist() {
         // Arrange
-        String username = "testuser";
-        String password = "wrongpassword";
+        String username = "nonexistent";
+        String password = "password";
         LoginInput loginInput = new LoginInput(username, password);
-        
-        when(userRepository.findByUsernameAndPassword(username, password)).thenReturn(Optional.empty());
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
 
         // Act & Assert
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () ->
                 userService.authenticate(loginInput)
         );
         assertEquals("User not found", exception.getMessage());
-        verify(userRepository).findByUsernameAndPassword(username, password);
+        verify(userRepository).findByUsername(username);
         verifyNoInteractions(jwtUtils);
     }
 
     @Test
-    void add_shouldSaveUser_whenSigninInputIsValid() {
+    void authenticate_shouldThrowUsernameNotFoundException_whenPasswordIsIncorrect() {
+        // Arrange
+        String username = "testuser";
+        String password = "wrongpassword";
+        String hashedPassword = "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi";
+        LoginInput loginInput = new LoginInput(username, password);
+        User user = User.builder().username(username).password(hashedPassword).build();
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+        // Act & Assert
+        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () ->
+                userService.authenticate(loginInput)
+        );
+        assertEquals("Invalid credentials", exception.getMessage());
+        verify(userRepository).findByUsername(username);
+        verifyNoInteractions(jwtUtils);
+    }
+
+    @Test
+    void add_shouldSaveUserWithHashedPassword_whenSigninInputIsValid() {
         // Arrange
         String username = "newuser";
         String password = "newpassword";
+        String hashedPassword = "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi";
         SigninInput signinInput = new SigninInput(username, password);
-        User user = mock(User.class);
-        
+        User user = User.builder().username(username).password(password).build();
+
         when(userMapper.toUser(signinInput)).thenReturn(user);
 
         // Act
@@ -127,4 +149,4 @@ class UserServiceImplTests {
         verify(userMapper).toUser(signinInput);
         verify(userRepository).save(user);
     }
-} 
+}

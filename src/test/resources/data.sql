@@ -3,26 +3,15 @@ INSERT INTO roles (id, name) VALUES
 (1, 'ROLE_ADMIN'),
 (2, 'ROLE_USER');
 
--- Insertion des utilisateurs de test
-INSERT INTO utilisateurs (username, password) VALUES 
-('admin', 'admin123'),
-('testuser', 'password123'),
-('user2', 'user123');
+-- Insertion des utilisateurs avec mots de passe hachés (BCrypt)
+INSERT INTO utilisateurs (username, password) VALUES
+('admin', '$2y$10$sxtfasgm1y/p/vyBw/N/1.IcOMWWJBbr8LmXDZS3.tI9z0ZW9w5e6'),     -- admin123
+('testuser', '$2y$10$ofm80KMkR1rCqI.x15G/I.nE9FoYPGxM8pixwRj7FYlz7IUztBlNu'), -- password123
+('user2', '$2y$10$SByAPRdDiDmfv54AW7JRcOv/tkM3dZoUfHFrsEHp1LmCTCGuXt/P.');     -- user123
 
 -- Association des utilisateurs avec les rôles
--- testuser -> ROLE_USER
 INSERT INTO utilisateur_role (user_id, role_id)
-VALUES (2, 2);
-
--- admin -> ROLE_ADMIN, ROLE_USER
-INSERT INTO utilisateur_role (user_id, role_id)
-VALUES (1, 1);
-INSERT INTO utilisateur_role (user_id, role_id)
-VALUES (1, 2);
-
--- user2 -> ROLE_USER
-INSERT INTO utilisateur_role (user_id, role_id)
-VALUES (3, 2);
+VALUES (2, 2), (1, 1), (1, 2), (3, 2);
 
 -- Insertion des aliments de test
 -- 5 aliments pour l'admin

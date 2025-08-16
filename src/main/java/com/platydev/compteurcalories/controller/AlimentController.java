@@ -46,7 +46,7 @@ public class AlimentController {
     }
 
     @PutMapping("/api/aliments/{alimentId}")
-    public ResponseEntity<Void> get(@PathVariable long alimentId, @RequestBody AlimentInputDTO alimentDTO) {
+    public ResponseEntity<Void> update(@PathVariable long alimentId, @RequestBody AlimentInputDTO alimentDTO) {
         alimentService.update(alimentId, alimentDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -11,6 +11,8 @@ import com.platydev.compteurcalories.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +25,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, JwtUtils jwtUtils, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
         this.userMapper = userMapper;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @Override
@@ -37,8 +42,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginOutput authenticate(LoginInput loginInput) {
-        User user = userRepository.findByUsernameAndPassword(loginInput.username(), loginInput.password())
+        User user = userRepository.findByUsername(loginInput.username())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(loginInput.password(), user.getPassword())) {
+            throw new UsernameNotFoundException("Invalid credentials");
+        }
 
         String token = jwtUtils.generateTokenFromUsername(user);
         return new LoginOutput(token, jwtUtils.getJwtExpiration());
@@ -48,6 +57,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void add(SigninInput signinInput) {
         User user = userMapper.toUser(signinInput);
+        user.setPassword(passwordEncoder.encode(signinInput.password()));
         userRepository.save(user);
     }
 }
