@@ -98,7 +98,7 @@ class AlimentServiceImplTests {
         when(authentication.getPrincipal()).thenReturn(user);
         SecurityContextHolder.setContext(securityContext);
 
-        when(alimentRepository.findUserAlimentsByNomOrCodeBarre(any(Pageable.class), eq("%" + word + "%"), any(User.class))).thenReturn(page);
+        when(alimentRepository.findUserAlimentsByNomOrCodeBarre(any(Pageable.class), eq("%" + word.toUpperCase() + "%"), any(User.class))).thenReturn(page);
         when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.getFirst());
         when(alimentMapper.toAlimentResponse(any(), any())).thenReturn(response);
 

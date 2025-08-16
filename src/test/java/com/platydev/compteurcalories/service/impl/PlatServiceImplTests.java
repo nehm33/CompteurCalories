@@ -131,7 +131,7 @@ class PlatServiceImplTests {
         PlatResponse response = mock(PlatResponse.class);
 
         when(platRepository.findByAlimentUserIdAndAlimentNomContainingIgnoreCase(
-                pageable, currentUser.getId(), search)).thenReturn(page);
+                pageable, currentUser.getId(), "%" + search.toUpperCase() + "%")).thenReturn(page);
         when(platMapper.toPlatWithoutRecetteDTOList(plats)).thenReturn(platDTOs);
         when(platMapper.toPlatResponse(platDTOs, page)).thenReturn(response);
 
@@ -141,7 +141,7 @@ class PlatServiceImplTests {
         // Assert
         assertEquals(response, result);
         verify(platRepository).findByAlimentUserIdAndAlimentNomContainingIgnoreCase(
-                pageable, currentUser.getId(), search);
+                pageable, currentUser.getId(), "%" + search.toUpperCase() + "%");
     }
 
     @Test
