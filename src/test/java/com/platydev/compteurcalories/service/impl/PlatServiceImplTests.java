@@ -2,6 +2,7 @@ package com.platydev.compteurcalories.service.impl;
 
 import com.platydev.compteurcalories.dto.input.PlatInputDTO;
 import com.platydev.compteurcalories.dto.input.RecetteInputDTO;
+import com.platydev.compteurcalories.dto.output.NutrientTotals;
 import com.platydev.compteurcalories.dto.output.PlatDTO;
 import com.platydev.compteurcalories.dto.output.PlatResponse;
 import com.platydev.compteurcalories.dto.output.PlatWithoutRecetteDTO;
@@ -46,6 +47,8 @@ class PlatServiceImplTests {
     private RecetteRepository recetteRepository;
     @Mock
     private PlatMapper platMapper;
+    @Mock
+    private NutritionalCalculator nutritionalCalculator;
 
     @InjectMocks
     private PlatServiceImpl platService;
@@ -55,6 +58,7 @@ class PlatServiceImplTests {
     private Aliment alimentIngredient;
     private Aliment alimentPlat;
     private Plat plat;
+    private NutrientTotals mockTotals;
 
     @BeforeEach
     void setUp() {
@@ -72,6 +76,7 @@ class PlatServiceImplTests {
         alimentIngredient.setId(10L);
         alimentIngredient.setNom("Tomate");
         alimentIngredient.setUser(currentUser);
+        alimentIngredient.setUnite("g");
         alimentIngredient.setCalories(20.0f);
         alimentIngredient.setProteines(1.0f);
 
@@ -88,6 +93,11 @@ class PlatServiceImplTests {
         plat.setNbPortions(2.0f);
         plat.setAliment(alimentPlat);
         alimentPlat.setPlat(plat);
+
+        // Setup mock totals
+        mockTotals = mock(NutrientTotals.class);
+        when(mockTotals.getCalories()).thenReturn(40.0f);
+        when(mockTotals.getProteines()).thenReturn(2.0f);
 
         // Mock SecurityContext
         Authentication authentication = mock(Authentication.class);
@@ -218,6 +228,9 @@ class PlatServiceImplTests {
         PlatInputDTO platDTO = new PlatInputDTO(2.0f, "Salade de tomates", List.of(recetteDTO));
 
         when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        when(nutritionalCalculator.createPlatAliment(eq(platDTO), eq(mockTotals), eq(currentUser)))
+                .thenReturn(alimentPlat);
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
         when(recetteRepository.saveAll(anyList())).thenReturn(List.of());
 
@@ -226,6 +239,8 @@ class PlatServiceImplTests {
 
         // Assert
         verify(alimentRepository).findById(10L);
+        verify(nutritionalCalculator).calculateTotals(any());
+        verify(nutritionalCalculator).createPlatAliment(eq(platDTO), eq(mockTotals), eq(currentUser));
         verify(alimentRepository).save(any(Aliment.class));
         verify(recetteRepository).saveAll(anyList());
     }
@@ -243,6 +258,7 @@ class PlatServiceImplTests {
                 () -> platService.add(platDTO));
         assertEquals("Aliment avec l'ID 999 non trouvé", exception.getMessage());
         verify(alimentRepository, never()).save(any());
+        verifyNoInteractions(nutritionalCalculator);
     }
 
     @Test
@@ -259,6 +275,7 @@ class PlatServiceImplTests {
                 () -> platService.add(platDTO));
         assertEquals("Vous n'avez pas accès à l'aliment avec l'ID 10", exception.getMessage());
         verify(alimentRepository, never()).save(any());
+        verifyNoInteractions(nutritionalCalculator);
     }
 
     @Test
@@ -272,6 +289,8 @@ class PlatServiceImplTests {
         PlatInputDTO platDTO = new PlatInputDTO(2.0f, "Salade", List.of(recetteDTO));
 
         when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        when(nutritionalCalculator.createPlatAliment(any(), any(), any())).thenReturn(alimentPlat);
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
         when(recetteRepository.saveAll(anyList())).thenReturn(List.of());
 
@@ -280,6 +299,8 @@ class PlatServiceImplTests {
 
         // Assert
         verify(alimentRepository).save(any(Aliment.class));
+        verify(nutritionalCalculator).calculateTotals(any());
+        verify(nutritionalCalculator).createPlatAliment(any(), any(), any());
     }
 
     @Test
@@ -296,6 +317,7 @@ class PlatServiceImplTests {
                 () -> platService.add(platDTO));
         assertEquals("Impossible d'utiliser un plat comme ingrédient d'un autre plat (ID: 10)",
                 exception.getMessage());
+        verifyNoInteractions(nutritionalCalculator);
     }
 
     @Test
@@ -306,6 +328,8 @@ class PlatServiceImplTests {
         PlatInputDTO platDTO = new PlatInputDTO(2.0f, "Salade", List.of(recette1, recette2));
 
         when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        when(nutritionalCalculator.createPlatAliment(any(), any(), any())).thenReturn(alimentPlat);
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
         when(recetteRepository.saveAll(anyList())).thenReturn(List.of());
 
@@ -318,6 +342,7 @@ class PlatServiceImplTests {
             return recettesList.size() == 1 &&
                     recettesList.getFirst().getQuantite() == 250.0f;
         }));
+        verify(nutritionalCalculator).calculateTotals(argThat(map -> map.containsKey(alimentIngredient) && map.get(alimentIngredient).equals(250.0f)));
     }
 
     @Test
@@ -334,6 +359,8 @@ class PlatServiceImplTests {
         when(platRepository.findById(platId)).thenReturn(Optional.of(plat));
         when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
         when(recetteRepository.findAllByRecetteId_PlatId(platId)).thenReturn(List.of(existingRecette));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        doNothing().when(nutritionalCalculator).updateAlimentWithTotals(any(), any(), anyFloat());
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
 
         // Act
@@ -341,6 +368,8 @@ class PlatServiceImplTests {
 
         // Assert
         verify(platRepository).findById(platId);
+        verify(nutritionalCalculator).calculateTotals(any());
+        verify(nutritionalCalculator).updateAlimentWithTotals(eq(alimentPlat), eq(mockTotals), eq(3.0f));
         verify(alimentRepository).save(any(Aliment.class));
         verify(recetteRepository, never()).deleteAll(any());
         verify(recetteRepository, never()).saveAll(any());
@@ -360,6 +389,8 @@ class PlatServiceImplTests {
         when(platRepository.findById(platId)).thenReturn(Optional.of(plat));
         when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
         when(recetteRepository.findAllByRecetteId_PlatId(platId)).thenReturn(List.of(existingRecette));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        doNothing().when(nutritionalCalculator).updateAlimentWithTotals(any(), any(), anyFloat());
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
         when(recetteRepository.saveAll(anyList())).thenReturn(List.of());
 
@@ -368,6 +399,8 @@ class PlatServiceImplTests {
 
         // Assert
         verify(recetteRepository).deleteAll(List.of(existingRecette));
+        verify(nutritionalCalculator).calculateTotals(any());
+        verify(nutritionalCalculator).updateAlimentWithTotals(any(), any(), anyFloat());
         verify(recetteRepository).saveAll(anyList());
         verify(alimentRepository).save(any(Aliment.class));
     }
@@ -384,6 +417,7 @@ class PlatServiceImplTests {
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> platService.update(platId, platDTO));
         assertEquals("Plat non trouvé", exception.getMessage());
+        verifyNoInteractions(nutritionalCalculator);
     }
 
     @Test
@@ -399,6 +433,7 @@ class PlatServiceImplTests {
         ForbiddenException exception = assertThrows(ForbiddenException.class,
                 () -> platService.update(platId, platDTO));
         assertEquals("Vous n'êtes pas autorisé à accéder à ce plat", exception.getMessage());
+        verifyNoInteractions(nutritionalCalculator);
     }
 
     @Test
@@ -452,26 +487,60 @@ class PlatServiceImplTests {
         PlatInputDTO platDTO = new PlatInputDTO(2.0f, "Test", List.of(recetteDTO));
 
         when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        when(nutritionalCalculator.createPlatAliment(any(), any(), any())).thenReturn(alimentPlat);
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
         when(recetteRepository.saveAll(anyList())).thenReturn(List.of());
 
         // Act & Assert - Ne doit pas lever d'exception
         assertDoesNotThrow(() -> platService.add(platDTO));
         verify(alimentRepository).save(any(Aliment.class));
+        verify(nutritionalCalculator).calculateTotals(any());
     }
 
     @Test
-    void safeDivide_shouldHandleZeroDivision() {
-        // Ce test vérifie le comportement de la division par zéro dans les calculs nutritionnels
+    void add_shouldHandlePortionUnit_whenIngredientIsPortionBased() {
         // Arrange
-        RecetteInputDTO recetteDTO = new RecetteInputDTO(10L, 200.0f);
-        PlatInputDTO platDTO = new PlatInputDTO(0.0f, "Test", List.of(recetteDTO)); // 0 portions
+        alimentIngredient.setUnite("portion");
+        RecetteInputDTO recetteDTO = new RecetteInputDTO(10L, 2.0f); // 2 portions
+        PlatInputDTO platDTO = new PlatInputDTO(1.0f, "Test Plat", List.of(recetteDTO));
 
         when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        when(nutritionalCalculator.createPlatAliment(any(), any(), any())).thenReturn(alimentPlat);
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
         when(recetteRepository.saveAll(anyList())).thenReturn(List.of());
 
-        // Act & Assert - Ne doit pas lever d'exception
-        assertDoesNotThrow(() -> platService.add(platDTO));
+        // Act
+        platService.add(platDTO);
+
+        // Assert
+        verify(nutritionalCalculator).calculateTotals(argThat(map -> {
+            // Vérifier que la quantité est utilisée telle quelle (pas divisée par 100)
+            return map.containsKey(alimentIngredient) && map.get(alimentIngredient).equals(2.0f);
+        }));
+    }
+
+    @Test
+    void add_shouldHandleGramUnit_whenIngredientIsGramBased() {
+        // Arrange
+        alimentIngredient.setUnite("g");
+        RecetteInputDTO recetteDTO = new RecetteInputDTO(10L, 200.0f); // 200g
+        PlatInputDTO platDTO = new PlatInputDTO(1.0f, "Test Plat", List.of(recetteDTO));
+
+        when(alimentRepository.findById(10L)).thenReturn(Optional.of(alimentIngredient));
+        when(nutritionalCalculator.calculateTotals(any())).thenReturn(mockTotals);
+        when(nutritionalCalculator.createPlatAliment(any(), any(), any())).thenReturn(alimentPlat);
+        when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentPlat);
+        when(recetteRepository.saveAll(anyList())).thenReturn(List.of());
+
+        // Act
+        platService.add(platDTO);
+
+        // Assert
+        verify(nutritionalCalculator).calculateTotals(argThat(map -> {
+            // Vérifier que la quantité est divisée par 100 pour les grammes
+            return map.containsKey(alimentIngredient) && map.get(alimentIngredient).equals(200.0f);
+        }));
     }
 }
