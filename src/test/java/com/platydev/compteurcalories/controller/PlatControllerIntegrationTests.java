@@ -136,7 +136,7 @@ class PlatControllerIntegrationTests {
 
         // Act - Rechercher les plats contenant "Saumon"
         ResponseEntity<PlatResponse> response = restTemplate.exchange(
-                baseUrl + "?page=0&size=20&search=Saumon",
+                baseUrl + "?page=0&size=20&search=saumon",
                 HttpMethod.GET,
                 request,
                 PlatResponse.class

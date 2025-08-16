@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -51,10 +52,10 @@ public class PlatServiceImpl implements PlatService {
         if (search != null && !search.trim().isEmpty()) {
             // Recherche avec filtre de nom pour l'utilisateur connecté
             platsPage = platRepository.findByAlimentUserIdAndAlimentNomContainingIgnoreCase(
-                    currentUser.getId(), search.trim(), pageable);
+                    pageable, currentUser.getId(), "%" + search.trim().toUpperCase() + "%");
         } else {
             // Récupérer tous les plats de l'utilisateur connecté
-            platsPage = platRepository.findByAlimentUserId(currentUser.getId(), pageable);
+            platsPage = platRepository.findByAlimentUserId(pageable, currentUser.getId());
         }
 
         // Utiliser le mapper pour convertir les entités en DTOs
@@ -72,6 +73,7 @@ public class PlatServiceImpl implements PlatService {
     }
 
     @Override
+    @Transactional
     public void add(@Valid PlatInputDTO platDTO) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -89,6 +91,7 @@ public class PlatServiceImpl implements PlatService {
     }
 
     @Override
+    @Transactional
     public void update(long platId, @Valid PlatInputDTO platDTO) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Plat platExistant = findPlatAndCheckOwnership(platId, currentUser.getId());
@@ -102,14 +105,15 @@ public class PlatServiceImpl implements PlatService {
         // Comparaison des recettes : même aliments avec mêmes quantités ?
         if (areRecettesIdentical(recettesExistantes, nouvellesRecettes)) {
             // Mise à jour simple : uniquement les données du plat (nom, nbPortions)
-            updatePlatDataOnly(platExistant, platDTO, nouvellesRecettes, currentUser);
+            updatePlatDataOnly(platExistant, platDTO, nouvellesRecettes);
         } else {
             // Mise à jour complète : suppression des anciennes recettes et recréation
-            updatePlatWithNewRecettes(platExistant, platDTO, nouvellesRecettes, currentUser);
+            updatePlatWithNewRecettes(platExistant, platDTO, nouvellesRecettes, recettesExistantes);
         }
     }
 
     @Override
+    @Transactional
     public void delete(long platId) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Plat plat = findPlatAndCheckOwnership(platId, currentUser.getId());
@@ -336,7 +340,7 @@ public class PlatServiceImpl implements PlatService {
      * Met à jour seulement les données du plat (nom, nbPortions) sans toucher aux recettes
      */
     private void updatePlatDataOnly(Plat platExistant, PlatInputDTO platDTO,
-                                    Map<Aliment, Float> alimentsQuantites, User user) {
+                                    Map<Aliment, Float> alimentsQuantites) {
 
         Aliment alimentExistant = platExistant.getAliment();
         alimentExistant.setNom(platDTO.nom());
@@ -361,10 +365,9 @@ public class PlatServiceImpl implements PlatService {
      * Met à jour le plat avec de nouvelles recettes (suppression + recréation)
      */
     private void updatePlatWithNewRecettes(Plat platExistant, PlatInputDTO platDTO,
-                                           Map<Aliment, Float> nouvellesRecettes, User user) {
+                                           Map<Aliment, Float> nouvellesRecettes, List<Recette> anciennesRecettes) {
 
         // Suppression des anciennes recettes
-        List<Recette> anciennesRecettes = recetteRepository.findAllByRecetteId_PlatId(platExistant.getId());
         recetteRepository.deleteAll(anciennesRecettes);
 
         // Mise à jour du nombre de portions

@@ -33,7 +33,7 @@ public class User implements UserDetails {
     @ToString.Exclude
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
             name = "utilisateur_role",
             joinColumns = @JoinColumn(name = "user_id"),

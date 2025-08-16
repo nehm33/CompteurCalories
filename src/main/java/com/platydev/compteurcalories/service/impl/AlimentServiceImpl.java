@@ -4,7 +4,6 @@ import com.platydev.compteurcalories.dto.input.AlimentInputDTO;
 import com.platydev.compteurcalories.dto.output.AlimentDTO;
 import com.platydev.compteurcalories.dto.output.AlimentResponse;
 import com.platydev.compteurcalories.entity.Aliment;
-import com.platydev.compteurcalories.entity.CodeBarre;
 import com.platydev.compteurcalories.entity.security.User;
 import com.platydev.compteurcalories.exception.ApiException;
 import com.platydev.compteurcalories.exception.ForbiddenException;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +60,7 @@ public class AlimentServiceImpl implements AlimentService {
 
         Page<Aliment> alimentPage;
         if (word != null) {
-            alimentPage = alimentRepository.findUserAlimentsByNomOrCodeBarre(pageable, "%" + word + "%", user);
+            alimentPage = alimentRepository.findUserAlimentsByNomOrCodeBarre(pageable, "%" + word.trim().toUpperCase() + "%", user);
         } else {
             alimentPage = alimentRepository.findUserAliments(pageable, user);
         }
@@ -92,6 +92,7 @@ public class AlimentServiceImpl implements AlimentService {
     }
 
     @Override
+    @Transactional
     public void add(@Valid AlimentInputDTO alimentDTO) {
         if (existsByName(alimentDTO.nom())) {
             throw new ApiException("Cet aliment existe déjà");
@@ -107,6 +108,7 @@ public class AlimentServiceImpl implements AlimentService {
     }
 
     @Override
+    @Transactional
     public void update(long alimentId, @Valid AlimentInputDTO alimentDTO) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         existsByIdAndByUser(alimentId, user);
@@ -115,19 +117,17 @@ public class AlimentServiceImpl implements AlimentService {
         aliment.setUser(user);
         aliment.setId(alimentId);
 
+        codeBarreRepository.findByAlimentId(alimentId).ifPresent(codeBarreRepository::delete);
+
         if (aliment.getCodeBarre() != null) {
             aliment.getCodeBarre().setAliment(aliment);
         }
-        Aliment updatedAliment = alimentRepository.save(aliment);
-        alimentMapper.toDTO(updatedAliment);
 
-        Optional<CodeBarre> codeBarreOptional = codeBarreRepository.findByAlimentId(alimentId);
-        if (codeBarreOptional.isEmpty() && aliment.getCodeBarre() != null) {
-            codeBarreRepository.save(aliment.getCodeBarre());
-        }
+        alimentRepository.save(aliment);
     }
 
     @Override
+    @Transactional
     public void delete(long alimentId) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         existsByIdAndByUser(alimentId, user);

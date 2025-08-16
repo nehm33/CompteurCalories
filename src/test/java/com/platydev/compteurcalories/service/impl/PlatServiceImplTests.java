@@ -106,7 +106,7 @@ class PlatServiceImplTests {
         List<PlatWithoutRecetteDTO> platDTOs = List.of(mock(PlatWithoutRecetteDTO.class));
         PlatResponse response = mock(PlatResponse.class);
 
-        when(platRepository.findByAlimentUserId(currentUser.getId(), pageable)).thenReturn(page);
+        when(platRepository.findByAlimentUserId(pageable, currentUser.getId())).thenReturn(page);
         when(platMapper.toPlatWithoutRecetteDTOList(plats)).thenReturn(platDTOs);
         when(platMapper.toPlatResponse(platDTOs, page)).thenReturn(response);
 
@@ -115,7 +115,7 @@ class PlatServiceImplTests {
 
         // Assert
         assertEquals(response, result);
-        verify(platRepository).findByAlimentUserId(currentUser.getId(), pageable);
+        verify(platRepository).findByAlimentUserId(pageable, currentUser.getId());
         verify(platMapper).toPlatWithoutRecetteDTOList(plats);
         verify(platMapper).toPlatResponse(platDTOs, page);
     }
@@ -131,7 +131,7 @@ class PlatServiceImplTests {
         PlatResponse response = mock(PlatResponse.class);
 
         when(platRepository.findByAlimentUserIdAndAlimentNomContainingIgnoreCase(
-                currentUser.getId(), search, pageable)).thenReturn(page);
+                pageable, currentUser.getId(), search)).thenReturn(page);
         when(platMapper.toPlatWithoutRecetteDTOList(plats)).thenReturn(platDTOs);
         when(platMapper.toPlatResponse(platDTOs, page)).thenReturn(response);
 
@@ -141,7 +141,7 @@ class PlatServiceImplTests {
         // Assert
         assertEquals(response, result);
         verify(platRepository).findByAlimentUserIdAndAlimentNomContainingIgnoreCase(
-                currentUser.getId(), search, pageable);
+                pageable, currentUser.getId(), search);
     }
 
     @Test
@@ -152,7 +152,7 @@ class PlatServiceImplTests {
         List<Plat> plats = List.of(plat);
         Page<Plat> page = new PageImpl<>(plats);
 
-        when(platRepository.findByAlimentUserId(currentUser.getId(), pageable)).thenReturn(page);
+        when(platRepository.findByAlimentUserId(pageable, currentUser.getId())).thenReturn(page);
         when(platMapper.toPlatWithoutRecetteDTOList(anyList())).thenReturn(List.of());
         when(platMapper.toPlatResponse(any(), any())).thenReturn(mock(PlatResponse.class));
 
@@ -160,8 +160,8 @@ class PlatServiceImplTests {
         platService.find(pageable, search);
 
         // Assert
-        verify(platRepository).findByAlimentUserId(currentUser.getId(), pageable);
-        verify(platRepository, never()).findByAlimentUserIdAndAlimentNomContainingIgnoreCase(anyLong(), anyString(), any());
+        verify(platRepository).findByAlimentUserId(pageable, currentUser.getId());
+        verify(platRepository, never()).findByAlimentUserIdAndAlimentNomContainingIgnoreCase(any(), anyLong(), anyString());
     }
 
     @Test

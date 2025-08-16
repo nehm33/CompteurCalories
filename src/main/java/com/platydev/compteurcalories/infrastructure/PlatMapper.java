@@ -30,11 +30,6 @@ public interface PlatMapper {
 
     List<PlatWithoutRecetteDTO> toPlatWithoutRecetteDTOList(List<Plat> plats);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "aliment", ignore = true)
-    @Mapping(target = "recettes", ignore = true)
-    Plat toEntity(PlatDTO platDTO);
-
     @Mapping(target = "content", source = "platDTOS")
     @Mapping(target = "pageNumber", expression = "java(page.getNumber())")
     @Mapping(target = "pageSize", expression = "java(page.getSize())")

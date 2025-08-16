@@ -24,7 +24,7 @@ public class CodeBarre {
     @Size(max = 30)
     private String marque;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "aliment_id")
     private Aliment aliment;
 }

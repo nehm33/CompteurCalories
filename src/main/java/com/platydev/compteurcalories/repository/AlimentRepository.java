@@ -13,13 +13,25 @@ import java.util.Optional;
 @Repository
 public interface AlimentRepository extends JpaRepository<Aliment, Long> {
 
+    @Query(value = "SELECT a FROM Aliment a LEFT JOIN FETCH a.codeBarre cb LEFT JOIN FETCH a.plat p LEFT JOIN FETCH a.user u " +
+            "WHERE p IS NULL",
+            countQuery = "SELECT COUNT(DISTINCT a.id) FROM Aliment a LEFT JOIN a.plat p WHERE p IS NULL")
     Page<Aliment> findAllByPlatIsNull(Pageable pageable);
 
-    @Query("SELECT a FROM Aliment a LEFT JOIN a.codeBarre cb LEFT JOIN a.plat p WHERE (a.user = :user OR a.user.id = 1) AND (a.nom LIKE :search OR cb.codeBarre LIKE :search) AND p IS NULL")
-    Page<Aliment> findUserAlimentsByNomOrCodeBarre(Pageable pageable, String search, User user);
+    @Query(value = "SELECT a FROM Aliment a LEFT JOIN FETCH a.codeBarre cb LEFT JOIN FETCH a.plat p LEFT JOIN FETCH a.user u " +
+            "WHERE (u = :user OR u.id = 1) AND (UPPER(a.nom) LIKE :pattern OR cb.codeBarre LIKE :pattern) " +
+            "AND p IS NULL",
+            countQuery = "SELECT COUNT(DISTINCT a.id) FROM Aliment a LEFT JOIN a.codeBarre cb LEFT JOIN a.plat p LEFT JOIN a.user u " +
+                    "WHERE (u = :user OR u.id = 1) AND (UPPER(a.nom) LIKE :pattern OR cb.codeBarre LIKE :pattern) AND p IS NULL")
+    Page<Aliment> findUserAlimentsByNomOrCodeBarre(Pageable pageable, String pattern, User user);
 
-    @Query("SELECT a FROM Aliment a LEFT JOIN a.plat p WHERE (a.user = :user OR a.user.id = 1) AND p IS NULL")
+    @Query(value = "SELECT a FROM Aliment a LEFT JOIN FETCH a.codeBarre cb LEFT JOIN FETCH a.plat p LEFT JOIN FETCH a.user u " +
+            "WHERE (u = :user OR u.id = 1) AND p IS NULL",
+            countQuery = "SELECT COUNT(DISTINCT a.id) FROM Aliment a LEFT JOIN a.plat p LEFT JOIN a.user u " +
+                    "WHERE (u = :user OR u.id = 1) AND p IS NULL")
     Page<Aliment> findUserAliments(Pageable pageable, User user);
 
+    @Query("SELECT a FROM Aliment a LEFT JOIN FETCH a.codeBarre cb LEFT JOIN FETCH a.plat p LEFT JOIN FETCH a.user u " +
+            "WHERE a.nom = :nom AND a.user = :user AND p IS NULL")
     Optional<Aliment> findByNomAndUserAndPlatIsNull(String nom, User user);
 }
