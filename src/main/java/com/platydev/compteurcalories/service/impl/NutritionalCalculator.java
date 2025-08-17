@@ -76,6 +76,23 @@ public class NutritionalCalculator {
         return totals;
     }
 
+    /**
+     * Calcule le total des calories pour une Map d'aliments et quantités
+     */
+    public float calculateTotalCalories(Map<Aliment, Float> alimentsQuantites) {
+        float total = 0f;
+        for (Map.Entry<Aliment, Float> entry : alimentsQuantites.entrySet()) {
+            Aliment aliment = entry.getKey();
+            float quantite = entry.getValue();
+
+            if (aliment.getCalories() != null) {
+                float multiplier = "portion".equals(aliment.getUnite()) ? quantite : quantite / 100f;
+                total += aliment.getCalories() * multiplier;
+            }
+        }
+        return total;
+    }
+
     public Aliment createPlatAliment(PlatInputDTO platDTO, NutrientTotals totals, User user) {
         float nbPortions = platDTO.nbPortions();
 
