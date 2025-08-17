@@ -12,4 +12,9 @@ import java.util.List;
 public interface JournalAlimentRepository extends JpaRepository<JournalAliment, JournalAlimentId> {
 
     List<JournalAliment> findAllByJournalAlimentId_Date(LocalDate date);
+
+    List<JournalAliment> findByJournalAlimentId_UserIdAndJournalAlimentId_Date(Long userId, LocalDate date);
+
+    List<JournalAliment> findByJournalAlimentId_UserIdAndJournalAlimentId_DateAndJournalAlimentId_Repas(
+            Long userId, LocalDate date, int repas);
 }

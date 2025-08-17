@@ -32,8 +32,8 @@ public class JournalAliment {
 
     private float quantite;
 
-    public JournalAliment(LocalDate date, Aliment aliment, User user, float quantite) {
-        this.journalAlimentId = new JournalAlimentId(aliment.getId(), user.getId(), date);
+    public JournalAliment(LocalDate date, Aliment aliment, User user, int repas, float quantite) {
+        this.journalAlimentId = new JournalAlimentId(aliment.getId(), user.getId(), date, repas);
         this.aliment = aliment;
         this.user = user;
         this.quantite = quantite;

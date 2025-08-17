@@ -92,8 +92,17 @@ CREATE TABLE composition_journal_aliment (
     aliment_id BIGINT REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
     user_id BIGINT REFERENCES utilisateurs ON UPDATE CASCADE ON DELETE CASCADE,
     date_journal DATE,
+    repas INT,
     quantite FLOAT(23),
-    PRIMARY KEY (aliment_id, user_id, date_journal)
+    PRIMARY KEY (aliment_id, user_id, date_journal, repas)
+);
+
+CREATE TABLE journal (
+    user_id BIGINT REFERENCES utilisateurs ON UPDATE CASCADE ON DELETE CASCADE,
+    date_journal DATE,
+    repas INT,
+    calories FLOAT(23),
+    PRIMARY KEY (user_id, date_journal, repas)
 );
 
 CREATE TABLE code_barre (

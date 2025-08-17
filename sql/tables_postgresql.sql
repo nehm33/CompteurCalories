@@ -94,8 +94,17 @@ CREATE TABLE composition_journal_aliment (
     aliment_id BIGSERIAL REFERENCES aliments ON UPDATE CASCADE ON DELETE RESTRICT,
     user_id BIGSERIAL REFERENCES utilisateurs ON UPDATE CASCADE ON DELETE CASCADE,
     date_journal DATE,
+    repas INTEGER,
     quantite FLOAT(23),
-    PRIMARY KEY (aliment_id, user_id, date_journal)
+    PRIMARY KEY (aliment_id, user_id, date_journal, repas)
+);
+
+CREATE TABLE journal (
+    user_id BIGSERIAL REFERENCES utilisateurs ON UPDATE CASCADE ON DELETE CASCADE,
+    date_journal DATE,
+    repas INTEGER,
+    calories FLOAT(23),
+    PRIMARY KEY (user_id, date_journal, repas)
 );
 
 CREATE TABLE code_barre (

@@ -14,10 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class JournalAlimentId implements Serializable {
-
-    @Column(name = "aliment_id")
-    private long alimentId;
+public class JournalId implements Serializable {
 
     @Column(name = "user_id")
     private long userId;
