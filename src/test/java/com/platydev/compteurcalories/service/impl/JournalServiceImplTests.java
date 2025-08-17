@@ -160,7 +160,7 @@ class JournalServiceImplTests {
                 new JournalAlimentDTO(1L, 100f),
                 new JournalAlimentDTO(2L, 150f)
         );
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, alimentQuantites);
+        JournalInputDTO input = new JournalInputDTO(alimentQuantites);
 
         when(journalRepository.existsById(new JournalId(testUser.getId(), testDate, repas)))
                 .thenReturn(false);
@@ -180,7 +180,7 @@ class JournalServiceImplTests {
     void addJournalEntry_ShouldThrowApiException_WhenJournalAlreadyExists() {
         // Given
         int repas = 1;
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, Collections.emptyList());
+        JournalInputDTO input = new JournalInputDTO(Collections.emptyList());
 
         when(journalRepository.existsById(new JournalId(testUser.getId(), testDate, repas)))
                 .thenReturn(true);
@@ -196,7 +196,7 @@ class JournalServiceImplTests {
     void addJournalEntry_ShouldThrowApiException_WhenInvalidRepasNumber() {
         // Given
         int repas = 5; // Invalid
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, Collections.emptyList());
+        JournalInputDTO input = new JournalInputDTO(Collections.emptyList());
 
         // When & Then
         ApiException exception = assertThrows(ApiException.class,
@@ -212,7 +212,7 @@ class JournalServiceImplTests {
         List<JournalAlimentDTO> alimentQuantites = List.of(
                 new JournalAlimentDTO(999L, 100f) // Aliment inexistant
         );
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, alimentQuantites);
+        JournalInputDTO input = new JournalInputDTO(alimentQuantites);
 
         when(journalRepository.existsById(any())).thenReturn(false);
         when(alimentRepository.findById(999L)).thenReturn(Optional.empty());
@@ -237,7 +237,7 @@ class JournalServiceImplTests {
         List<JournalAlimentDTO> alimentQuantites = List.of(
                 new JournalAlimentDTO(3L, 100f)
         );
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, alimentQuantites);
+        JournalInputDTO input = new JournalInputDTO(alimentQuantites);
 
         when(journalRepository.existsById(any())).thenReturn(false);
         when(alimentRepository.findById(3L)).thenReturn(Optional.of(forbiddenAliment));
@@ -252,7 +252,7 @@ class JournalServiceImplTests {
     void addJournalEntry_ShouldThrowApiException_WhenEmptyAlimentList() {
         // Given
         int repas = 1;
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, Collections.emptyList());
+        JournalInputDTO input = new JournalInputDTO(Collections.emptyList());
 
         when(journalRepository.existsById(any())).thenReturn(false);
 
@@ -269,7 +269,7 @@ class JournalServiceImplTests {
         List<JournalAlimentDTO> alimentQuantites = List.of(
                 new JournalAlimentDTO(1L, -50f) // Quantité négative
         );
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, alimentQuantites);
+        JournalInputDTO input = new JournalInputDTO(alimentQuantites);
 
         when(journalRepository.existsById(any())).thenReturn(false);
 
@@ -286,7 +286,7 @@ class JournalServiceImplTests {
         List<JournalAlimentDTO> alimentQuantites = List.of(
                 new JournalAlimentDTO(1L, 200f)
         );
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, alimentQuantites);
+        JournalInputDTO input = new JournalInputDTO(alimentQuantites);
 
         JournalId journalId = new JournalId(testUser.getId(), testDate, repas);
         Journal existingJournal = new Journal();
@@ -314,7 +314,7 @@ class JournalServiceImplTests {
     void updateJournalEntry_ShouldThrowNotFoundException_WhenJournalNotExists() {
         // Given
         int repas = 1;
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, Collections.emptyList());
+        JournalInputDTO input = new JournalInputDTO(Collections.emptyList());
 
         JournalId journalId = new JournalId(testUser.getId(), testDate, repas);
         when(journalRepository.existsById(journalId)).thenReturn(false);
@@ -448,7 +448,7 @@ class JournalServiceImplTests {
                 new JournalAlimentDTO(1L, 75f), // Même aliment, quantités à additionner
                 new JournalAlimentDTO(2L, 100f)
         );
-        JournalInputDTO input = new JournalInputDTO(testDate, repas, alimentQuantites);
+        JournalInputDTO input = new JournalInputDTO(alimentQuantites);
 
         when(journalRepository.existsById(any())).thenReturn(false);
         when(alimentRepository.findById(1L)).thenReturn(Optional.of(testAliment1));
