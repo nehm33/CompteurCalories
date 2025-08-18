@@ -51,7 +51,7 @@ public class PlatServiceImpl implements PlatService {
     @Override
     public PlatResponse find(Pageable pageable, String search) {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Page<Plat> platsPage;
+        Page<PlatWithoutRecetteDTO> platsPage;
 
         if (search != null && !search.trim().isEmpty()) {
             // Recherche avec filtre de nom pour l'utilisateur connecté
@@ -62,11 +62,8 @@ public class PlatServiceImpl implements PlatService {
             platsPage = platRepository.findByAlimentUserId(pageable, currentUser.getId());
         }
 
-        // Utiliser le mapper pour convertir les entités en DTOs
-        List<PlatWithoutRecetteDTO> platDTOs = platMapper.toPlatWithoutRecetteDTOList(platsPage.getContent());
-
         // Créer la réponse paginée avec le mapper
-        return platMapper.toPlatResponse(platDTOs, platsPage);
+        return platMapper.toPlatResponse(platsPage);
     }
 
     @Override
@@ -134,7 +131,7 @@ public class PlatServiceImpl implements PlatService {
                     .orElseThrow(() -> new NotFoundException("Aliment avec l'ID " + recetteDTO.alimentId() + " non trouvé"));
 
             // Vérifier que l'utilisateur a accès à cet aliment
-            if (!aliment.getUser().equals(currentUser) && aliment.getUser().getId() != 1L) {
+            if (!aliment.getUserId().equals(currentUser.getId()) && aliment.getUserId() != 1L) {
                 throw new ForbiddenException("Vous n'avez pas accès à l'aliment avec l'ID " + recetteDTO.alimentId());
             }
 
@@ -230,7 +227,7 @@ public class PlatServiceImpl implements PlatService {
                 .orElseThrow(() -> new NotFoundException("Plat non trouvé"));
 
         // 2. Vérifier que l'utilisateur a le droit d'y accéder
-        if (!plat.getAliment().getUser().getId().equals(userId)) {
+        if (!plat.getAliment().getUserId().equals(userId)) {
             throw new ForbiddenException("Vous n'êtes pas autorisé à accéder à ce plat");
         }
 

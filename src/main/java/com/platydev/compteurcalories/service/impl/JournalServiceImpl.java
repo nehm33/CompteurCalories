@@ -97,7 +97,7 @@ public class JournalServiceImpl implements JournalService {
         float caloriesTotal = nutritionalCalculator.calculateTotalCalories(alimentsQuantites);
 
         // Créer l'entrée Journal
-        Journal journal = new Journal(date, null, user, repas, caloriesTotal);
+        Journal journal = new Journal(date, user, repas, caloriesTotal);
         journalRepository.save(journal);
 
         // Créer les entrées JournalAliment
@@ -251,7 +251,7 @@ public class JournalServiceImpl implements JournalService {
                     .orElseThrow(() -> new NotFoundException("Aliment avec l'ID " + alimentDTO.alimentId() + " non trouvé"));
 
             // Vérification des droits d'accès
-            if (!aliment.getUser().equals(user) && aliment.getUser().getId() != 1L) {
+            if (!aliment.getUserId().equals(user.getId()) && aliment.getUserId() != 1L) {
                 throw new ForbiddenException("Vous n'avez pas accès à l'aliment avec l'ID " + alimentDTO.alimentId());
             }
 

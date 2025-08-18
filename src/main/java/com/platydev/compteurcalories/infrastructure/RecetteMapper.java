@@ -15,7 +15,4 @@ public interface RecetteMapper {
     @Mapping(target = "alimentUnite", source = "recette.aliment.unite")
     @Mapping(target = "quantite", source = "recette.quantite")
     RecetteDTO toDTO(Recette recette);
-
-    @Mapping(target = "recetteId.alimentId", source = "alimentId")
-    Recette toEntity(RecetteDTO recetteDTO);
 }

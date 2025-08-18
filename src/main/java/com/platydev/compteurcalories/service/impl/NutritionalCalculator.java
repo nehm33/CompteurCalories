@@ -151,7 +151,7 @@ public class NutritionalCalculator {
                 .V(safeDivide(totals.getV(), nbPortions))
                 .Sn(safeDivide(totals.getSn(), nbPortions))
                 .Zn(safeDivide(totals.getZn(), nbPortions))
-                .user(user)
+                .userId(user.getId())
                 .build();
     }
 

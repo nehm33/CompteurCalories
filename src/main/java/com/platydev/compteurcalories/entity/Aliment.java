@@ -1,6 +1,5 @@
 package com.platydev.compteurcalories.entity;
 
-import com.platydev.compteurcalories.entity.security.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -213,9 +212,9 @@ public class Aliment {
     @ToString.Exclude
     private CodeBarre codeBarre;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @Column(name = "user_id")
     @ToString.Exclude
-    private User user;
+    private Long userId;
 
     @OneToOne(mappedBy = "aliment", cascade = CascadeType.ALL)
     @ToString.Exclude
