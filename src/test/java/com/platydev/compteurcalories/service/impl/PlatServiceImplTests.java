@@ -75,7 +75,7 @@ class PlatServiceImplTests {
         alimentIngredient = new Aliment();
         alimentIngredient.setId(10L);
         alimentIngredient.setNom("Tomate");
-        alimentIngredient.setUser(currentUser);
+        alimentIngredient.setUserId(currentUser.getId());
         alimentIngredient.setUnite("g");
         alimentIngredient.setCalories(20.0f);
         alimentIngredient.setProteines(1.0f);
@@ -84,7 +84,7 @@ class PlatServiceImplTests {
         alimentPlat = new Aliment();
         alimentPlat.setId(20L);
         alimentPlat.setNom("Salade de tomates");
-        alimentPlat.setUser(currentUser);
+        alimentPlat.setUserId(currentUser.getId());
         alimentPlat.setUnite("portion");
 
         // Setup plat
@@ -111,14 +111,12 @@ class PlatServiceImplTests {
     void find_shouldReturnPlatResponse_withoutSearch() {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
-        List<Plat> plats = List.of(plat);
-        Page<Plat> page = new PageImpl<>(plats);
         List<PlatWithoutRecetteDTO> platDTOs = List.of(mock(PlatWithoutRecetteDTO.class));
+        Page<PlatWithoutRecetteDTO> page = new PageImpl<>(platDTOs);
         PlatResponse response = mock(PlatResponse.class);
 
         when(platRepository.findByAlimentUserId(pageable, currentUser.getId())).thenReturn(page);
-        when(platMapper.toPlatWithoutRecetteDTOList(plats)).thenReturn(platDTOs);
-        when(platMapper.toPlatResponse(platDTOs, page)).thenReturn(response);
+        when(platMapper.toPlatResponse(page)).thenReturn(response);
 
         // Act
         PlatResponse result = platService.find(pageable, null);
@@ -126,8 +124,7 @@ class PlatServiceImplTests {
         // Assert
         assertEquals(response, result);
         verify(platRepository).findByAlimentUserId(pageable, currentUser.getId());
-        verify(platMapper).toPlatWithoutRecetteDTOList(plats);
-        verify(platMapper).toPlatResponse(platDTOs, page);
+        verify(platMapper).toPlatResponse(page);
     }
 
     @Test
@@ -135,15 +132,13 @@ class PlatServiceImplTests {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         String search = "salade";
-        List<Plat> plats = List.of(plat);
-        Page<Plat> page = new PageImpl<>(plats);
         List<PlatWithoutRecetteDTO> platDTOs = List.of(mock(PlatWithoutRecetteDTO.class));
+        Page<PlatWithoutRecetteDTO> page = new PageImpl<>(platDTOs);
         PlatResponse response = mock(PlatResponse.class);
 
         when(platRepository.findByAlimentUserIdAndAlimentNomContainingIgnoreCase(
                 pageable, currentUser.getId(), "%" + search.toUpperCase() + "%")).thenReturn(page);
-        when(platMapper.toPlatWithoutRecetteDTOList(plats)).thenReturn(platDTOs);
-        when(platMapper.toPlatResponse(platDTOs, page)).thenReturn(response);
+        when(platMapper.toPlatResponse(page)).thenReturn(response);
 
         // Act
         PlatResponse result = platService.find(pageable, search);
@@ -159,12 +154,12 @@ class PlatServiceImplTests {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         String search = "   ";
-        List<Plat> plats = List.of(plat);
-        Page<Plat> page = new PageImpl<>(plats);
+        List<PlatWithoutRecetteDTO> platDTOs = List.of(mock(PlatWithoutRecetteDTO.class));
+        Page<PlatWithoutRecetteDTO> page = new PageImpl<>(platDTOs);
+        PlatResponse response = mock(PlatResponse.class);
 
         when(platRepository.findByAlimentUserId(pageable, currentUser.getId())).thenReturn(page);
-        when(platMapper.toPlatWithoutRecetteDTOList(anyList())).thenReturn(List.of());
-        when(platMapper.toPlatResponse(any(), any())).thenReturn(mock(PlatResponse.class));
+        when(platMapper.toPlatResponse(any())).thenReturn(response);
 
         // Act
         platService.find(pageable, search);
@@ -210,7 +205,7 @@ class PlatServiceImplTests {
     void findById_shouldThrowForbiddenException_whenPlatNotOwned() {
         // Arrange
         long platId = 30L;
-        plat.getAliment().setUser(otherUser);
+        plat.getAliment().setUserId(otherUser.getId());
         when(platRepository.findById(platId)).thenReturn(Optional.of(plat));
 
         // Act & Assert
@@ -264,7 +259,7 @@ class PlatServiceImplTests {
     @Test
     void add_shouldThrowForbiddenException_whenIngredientNotAccessible() {
         // Arrange
-        alimentIngredient.setUser(otherUser);
+        alimentIngredient.setUserId(otherUser.getId());
         RecetteInputDTO recetteDTO = new RecetteInputDTO(10L, 200.0f);
         PlatInputDTO platDTO = new PlatInputDTO(2.0f, "Salade", List.of(recetteDTO));
 
@@ -283,7 +278,7 @@ class PlatServiceImplTests {
         // Arrange
         User systemUser = new User();
         systemUser.setId(1L);
-        alimentIngredient.setUser(systemUser);
+        alimentIngredient.setUserId(systemUser.getId());
 
         RecetteInputDTO recetteDTO = new RecetteInputDTO(10L, 200.0f);
         PlatInputDTO platDTO = new PlatInputDTO(2.0f, "Salade", List.of(recetteDTO));
@@ -424,7 +419,7 @@ class PlatServiceImplTests {
     void update_shouldThrowForbiddenException_whenPlatNotOwned() {
         // Arrange
         long platId = 30L;
-        plat.getAliment().setUser(otherUser);
+        plat.getAliment().setUserId(otherUser.getId());
         PlatInputDTO platDTO = new PlatInputDTO(2.0f, "Test", List.of());
 
         when(platRepository.findById(platId)).thenReturn(Optional.of(plat));
@@ -467,7 +462,7 @@ class PlatServiceImplTests {
     void delete_shouldThrowForbiddenException_whenPlatNotOwned() {
         // Arrange
         long platId = 30L;
-        plat.getAliment().setUser(otherUser);
+        plat.getAliment().setUserId(otherUser.getId());
         when(platRepository.findById(platId)).thenReturn(Optional.of(plat));
 
         // Act & Assert

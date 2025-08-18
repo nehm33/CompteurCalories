@@ -92,7 +92,7 @@ class JournalServiceImplTests {
                 .nom("Pomme")
                 .calories(52f)
                 .unite("100g")
-                .user(testUser)
+                .userId(testUser.getId())
                 .build();
 
         testAliment2 = Aliment.builder()
@@ -100,7 +100,7 @@ class JournalServiceImplTests {
                 .nom("Banane")
                 .calories(89f)
                 .unite("100g")
-                .user(adminUser) // Aliment public
+                .userId(adminUser.getId()) // Aliment public
                 .build();
 
         testDate = LocalDate.of(2024, 1, 15);
@@ -230,7 +230,7 @@ class JournalServiceImplTests {
         Aliment forbiddenAliment = Aliment.builder()
                 .id(3L)
                 .nom("Forbidden")
-                .user(otherUser)
+                .userId(otherUser.getId())
                 .build();
 
         int repas = 1;

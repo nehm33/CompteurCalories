@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -89,7 +90,7 @@ class AlimentServiceImplTests {
         Page<Aliment> page = new PageImpl<>(List.of(new Aliment()));
         List<AlimentDTO> alimentDTOS = List.of(mock(AlimentDTO.class));
         AlimentResponse response = mock(AlimentResponse.class);
-        User user = mock(User.class);
+        User user = User.builder().id(5L).roles(Set.of()).build();
 
         // Mock SecurityContext
         Authentication authentication = mock(Authentication.class);
@@ -98,7 +99,7 @@ class AlimentServiceImplTests {
         when(authentication.getPrincipal()).thenReturn(user);
         SecurityContextHolder.setContext(securityContext);
 
-        when(alimentRepository.findUserAlimentsByNomOrCodeBarre(any(Pageable.class), eq("%" + word.toUpperCase() + "%"), any(User.class))).thenReturn(page);
+        when(alimentRepository.findUserAlimentsByNomOrCodeBarre(any(Pageable.class), eq("%" + word.toUpperCase() + "%"), any(Long.class))).thenReturn(page);
         when(alimentMapper.toDTO(any(Aliment.class))).thenReturn(alimentDTOS.getFirst());
         when(alimentMapper.toAlimentResponse(any(), any())).thenReturn(response);
 
@@ -114,8 +115,8 @@ class AlimentServiceImplTests {
         // Arrange
         AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         when(alimentDTO.nom()).thenReturn("test");
-        when(alimentRepository.findByNomAndUserAndPlatIsNull(anyString(), any())).thenReturn(Optional.empty());
-        User user = mock(User.class);
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(anyString(), eq(5L))).thenReturn(Optional.empty());
+        User user = User.builder().id(5L).roles(Set.of()).build();
         Aliment aliment = new Aliment();
         when(alimentMapper.toEntity(alimentDTO)).thenReturn(aliment);
         
@@ -138,8 +139,8 @@ class AlimentServiceImplTests {
         // Arrange
         AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
         when(alimentDTO.nom()).thenReturn("test");
-        when(alimentRepository.findByNomAndUserAndPlatIsNull(anyString(), any())).thenReturn(Optional.of(new Aliment()));
-        User user = mock(User.class);
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(anyString(), eq(5L))).thenReturn(Optional.of(new Aliment()));
+        User user = User.builder().id(5L).roles(Set.of()).build();
         
         // Mock SecurityContext
         Authentication authentication = mock(Authentication.class);
@@ -159,9 +160,9 @@ class AlimentServiceImplTests {
         // Arrange
         long alimentId = 1L;
         AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
-        User user = mock(User.class);
+        User user = User.builder().id(5L).roles(Set.of()).build();
         Aliment aliment = new Aliment();
-        aliment.setUser(user);
+        aliment.setUserId(user.getId());
         
         when(alimentRepository.findById(alimentId)).thenReturn(Optional.of(aliment));
         when(codeBarreRepository.findByAlimentId(alimentId)).thenReturn(Optional.empty());
@@ -188,10 +189,10 @@ class AlimentServiceImplTests {
         // Arrange
         long alimentId = 1L;
         AlimentInputDTO alimentDTO = mock(AlimentInputDTO.class);
-        User user = mock(User.class);
-        User otherUser = mock(User.class);
+        User user = User.builder().id(5L).roles(Set.of()).build();
+        User otherUser = User.builder().id(3L).roles(Set.of()).build();
         Aliment aliment = new Aliment();
-        aliment.setUser(otherUser);
+        aliment.setUserId(otherUser.getId());
         
         when(alimentRepository.findById(alimentId)).thenReturn(Optional.of(aliment));
         
@@ -212,9 +213,9 @@ class AlimentServiceImplTests {
     void delete_shouldDeleteAliment_whenOwned() {
         // Arrange
         long alimentId = 1L;
-        User user = mock(User.class);
+        User user = User.builder().id(5L).roles(Set.of()).build();
         Aliment aliment = new Aliment();
-        aliment.setUser(user);
+        aliment.setUserId(user.getId());
         
         when(alimentRepository.findById(alimentId)).thenReturn(Optional.of(aliment));
         
@@ -236,10 +237,10 @@ class AlimentServiceImplTests {
     void delete_shouldThrowForbiddenException_whenNotOwned() {
         // Arrange
         long alimentId = 1L;
-        User user = mock(User.class);
-        User otherUser = mock(User.class);
+        User user = User.builder().id(5L).roles(Set.of()).build();
+        User otherUser = User.builder().id(3L).roles(Set.of()).build();
         Aliment aliment = new Aliment();
-        aliment.setUser(otherUser);
+        aliment.setUserId(otherUser.getId());
         
         when(alimentRepository.findById(alimentId)).thenReturn(Optional.of(aliment));
         
@@ -260,8 +261,8 @@ class AlimentServiceImplTests {
     void existsByName_shouldReturnTrue_whenAlimentExists() {
         // Arrange
         String alimentName = "test";
-        User user = mock(User.class);
-        when(alimentRepository.findByNomAndUserAndPlatIsNull(eq(alimentName), eq(user))).thenReturn(Optional.of(new Aliment()));
+        User user = User.builder().id(5L).roles(Set.of()).build();
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(eq(alimentName), eq(user.getId()))).thenReturn(Optional.of(new Aliment()));
         
         // Mock SecurityContext
         Authentication authentication = mock(Authentication.class);
@@ -281,8 +282,8 @@ class AlimentServiceImplTests {
     void existsByName_shouldReturnFalse_whenAlimentDoesNotExist() {
         // Arrange
         String alimentName = "test";
-        User user = mock(User.class);
-        when(alimentRepository.findByNomAndUserAndPlatIsNull(eq(alimentName), eq(user))).thenReturn(Optional.empty());
+        User user = User.builder().id(5L).roles(Set.of()).build();
+        when(alimentRepository.findByNomAndUserAndPlatIsNull(eq(alimentName), eq(user.getId()))).thenReturn(Optional.empty());
         
         // Mock SecurityContext
         Authentication authentication = mock(Authentication.class);

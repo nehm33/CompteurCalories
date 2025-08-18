@@ -342,6 +342,7 @@ class JournalControllerIntegrationTests {
     void updateJournalEntry_shouldUpdateBreakfastForTestUser() {
         // Arrange - Modifier le petit-déjeuner existant
         List<JournalAlimentDTO> aliments = List.of(
+                new JournalAlimentDTO(1L, 100.0f), // Pomme Rouge (admin) - 52 cal
                 new JournalAlimentDTO(2L, 100.0f), // Banane (admin) - 89 cal
                 new JournalAlimentDTO(3L, 50.0f)   // Riz Blanc (admin) - 130 cal * 0.5 = 65 cal
         );
@@ -378,7 +379,7 @@ class JournalControllerIntegrationTests {
 
         assertEquals(HttpStatus.OK, getResponse.getStatusCode());
         assertNotNull(getResponse.getBody());
-        assertEquals(154.0f, getResponse.getBody().breakfast(), 0.01f); // 89 + 65 = 154
+        assertEquals(206.0f, getResponse.getBody().breakfast(), 0.01f); // 89 + 65 + 52 = 206
         assertEquals(288.5f, getResponse.getBody().lunch(), 0.01f); // Inchangé
         assertEquals(370.5f, getResponse.getBody().diner(), 0.01f); // Inchangé
     }
@@ -432,45 +433,45 @@ class JournalControllerIntegrationTests {
         assertEquals("2024-01-01", response.getBody().date().toString());
         assertNull(response.getBody().repas());
         assertNotNull(response.getBody().alimentQuantites());
-        assertEquals(7, response.getBody().alimentQuantites().size()); // 2 aliments petit-déj + 2 aliments déjeuner + 3 aliments dîner
+        assertEquals(8, response.getBody().alimentQuantites().size()); // 3 aliments petit-déj + 2 aliments déjeuner + 3 aliments dîner
 
         // Vérifier les totaux nutritionnels détaillés pour toute la journée
-        // Petit-déjeuner modifié: 100g Banane + 50g Riz Blanc = 89 + 65 = 154 cal
+        // Petit-déjeuner modifié: 100g Banane + 50g Riz Blanc + 100g Pomme Rouge = 89 + 65 + 52 = 206 cal
         // Déjeuner: 150g Poulet Grillé + 100g Carotte = 247.5 + 41 = 288.5 cal
         // Dîner: 100g Saumon + 150g Yaourt + 1 portion Smoothie Bowl = 208 + 88.5 + 74 = 370.5 cal
         // Total: 154 + 288.5 + 370.5 = 813 cal
         assertNotNull(response.getBody().nutrients());
-        assertEquals(813.0f, response.getBody().nutrients().getCalories(), 0.1f);
+        assertEquals(865.0f, response.getBody().nutrients().getCalories(), 0.1f);
 
         // Calculs détaillés des macronutriments pour la journée complète:
-        // Matières grasses: (100g Banane: 0.3g) + (50g Riz: 0.15g) + (150g Poulet: 5.4g) + (100g Carotte: 0.2g) + (100g Saumon: 12.4g) + (150g Yaourt: 0.6g) + (1 portion Smoothie: 0.35g) = 19.4g
-        assertEquals(19.4f, response.getBody().nutrients().getMatieresGrasses(), 0.1f);
+        // Matières grasses: (100g Banane: 0.3g) + (100g Pomme Rouge: 0.2g) + (50g Riz: 0.15g) + (150g Poulet: 5.4g) + (100g Carotte: 0.2g) + (100g Saumon: 12.4g) + (150g Yaourt: 0.6g) + (1 portion Smoothie: 0.35g) = 19.6g
+        assertEquals(19.6f, response.getBody().nutrients().getMatieresGrasses(), 0.1f);
 
-        // Protéines: (100g Banane: 1.1g) + (50g Riz: 1.35g) + (150g Poulet: 46.5g) + (100g Carotte: 0.9g) + (100g Saumon: 22.1g) + (150g Yaourt: 15g) + (1 portion Smoothie: 5.55g) = 92.5g
-        assertEquals(92.5f, response.getBody().nutrients().getProteines(), 0.1f);
+        // Protéines: (100g Banane: 1.1g) + (100g Pomme Rouge: 0.3g) + (50g Riz: 1.35g) + (150g Poulet: 46.5g) + (100g Carotte: 0.9g) + (100g Saumon: 22.1g) + (150g Yaourt: 15g) + (1 portion Smoothie: 5.55g) = 92.8g
+        assertEquals(92.8f, response.getBody().nutrients().getProteines(), 0.1f);
 
-        // Glucides: (100g Banane: 23g) + (50g Riz: 14g) + (150g Poulet: 0g) + (100g Carotte: 10g) + (100g Saumon: 0g) + (150g Yaourt: 5.4g) + (1 portion Smoothie: 13.3g) = 65.7g
-        assertEquals(65.7f, response.getBody().nutrients().getGlucides(), 0.1f);
+        // Glucides: (100g Banane: 23g) + (100g Pomme Rouge: 14g) + (50g Riz: 14g) + (150g Poulet: 0g) + (100g Carotte: 10g) + (100g Saumon: 0g) + (150g Yaourt: 5.4g) + (1 portion Smoothie: 13.3g) = 79.7g
+        assertEquals(79.7f, response.getBody().nutrients().getGlucides(), 0.1f);
 
-        // Fibres: (100g Banane: 2.6g) + (50g Riz: 0.2g) + (150g Poulet: 0g) + (100g Carotte: 2.8g) + (100g Saumon: 0g) + (150g Yaourt: 0g) + (1 portion Smoothie: 1.3g) = 6.9g
-        assertEquals(6.9f, response.getBody().nutrients().getFibres(), 0.1f);
+        // Fibres: (100g Banane: 2.6g) + (100g Pomme Rouge: 2.4g) + (50g Riz: 0.2g) + (150g Poulet: 0g) + (100g Carotte: 2.8g) + (100g Saumon: 0g) + (150g Yaourt: 0g) + (1 portion Smoothie: 1.3g) = 9.3g
+        assertEquals(9.3f, response.getBody().nutrients().getFibres(), 0.1f);
 
         // Vitamines importantes:
-        // Vitamine C: (100g Banane: 8.7mg) + (50g Riz: 0mg) + (150g Poulet: 0mg) + (100g Carotte: 5.9mg) + (100g Saumon: 11mg) + (150g Yaourt: 0mg) + (1 portion Smoothie: 4.35mg) = 29.95mg
-        assertEquals(29.95f, response.getBody().nutrients().getVitamineC(), 0.1f);
+        // Vitamine C: (100g Banane: 8.7mg) + (100g Pomme Rouge: 4.6mg) + (50g Riz: 0mg) + (150g Poulet: 0mg) + (100g Carotte: 5.9mg) + (100g Saumon: 11mg) + (150g Yaourt: 0mg) + (1 portion Smoothie: 4.35mg) = 34.55mg
+        assertEquals(34.55f, response.getBody().nutrients().getVitamineC(), 0.1f);
 
-        // Vitamine B12: (100g Banane: 0mg) + (50g Riz: 0mg) + (150g Poulet: 0.45mg) + (100g Carotte: 0mg) + (100g Saumon: 3.2mg) + (150g Yaourt: 0.6mg) + (1 portion Smoothie: 0.2mg) = 4.45mg
+        // Vitamine B12: (100g Banane: 0mg) + (100g Pomme Rouge: 0mg) + (50g Riz: 0mg) + (150g Poulet: 0.45mg) + (100g Carotte: 0mg) + (100g Saumon: 3.2mg) + (150g Yaourt: 0.6mg) + (1 portion Smoothie: 0.2mg) = 4.45mg
         assertEquals(4.45f, response.getBody().nutrients().getVitamineB12(), 0.1f);
 
         // Minéraux:
-        // Calcium (Ca): (100g Banane: 5mg) + (50g Riz: 14mg) + (150g Poulet: 22.5mg) + (100g Carotte: 33mg) + (100g Saumon: 12mg) + (150g Yaourt: 165mg) + (1 portion Smoothie: 57.5mg) = 309mg
-        assertEquals(309.0f, response.getBody().nutrients().getCa(), 0.1f);
+        // Calcium (Ca): (100g Banane: 5mg) + (100g Pomme Rouge: 6mg) + (50g Riz: 14mg) + (150g Poulet: 22.5mg) + (100g Carotte: 33mg) + (100g Saumon: 12mg) + (150g Yaourt: 165mg) + (1 portion Smoothie: 57.5mg) = 315mg
+        assertEquals(315.0f, response.getBody().nutrients().getCa(), 0.1f);
 
-        // Fer (Fe): (100g Banane: 0.26mg) + (50g Riz: 0.4mg) + (150g Poulet: 1.335mg) + (100g Carotte: 0.3mg) + (100g Saumon: 0.31mg) + (150g Yaourt: 0.06mg) + (1 portion Smoothie: 0.15mg) = 2.815mg
-        assertEquals(2.815f, response.getBody().nutrients().getFe(), 0.1f);
+        // Fer (Fe): (100g Banane: 0.26mg) + (100g Pomme Rouge: 0.12mg) + (50g Riz: 0.4mg) + (150g Poulet: 1.335mg) + (100g Carotte: 0.3mg) + (100g Saumon: 0.31mg) + (150g Yaourt: 0.06mg) + (1 portion Smoothie: 0.15mg) = 2.935mg
+        assertEquals(2.935f, response.getBody().nutrients().getFe(), 0.1f);
 
-        // Potassium (K): (100g Banane: 358mg) + (50g Riz: 17.5mg) + (150g Poulet: 384mg) + (100g Carotte: 320mg) + (100g Saumon: 628mg) + (150g Yaourt: 211.5mg) + (1 portion Smoothie: 249.5mg) = 2168.5mg
-        assertEquals(2168.5f, response.getBody().nutrients().getK(), 0.1f);
+        // Potassium (K): (100g Banane: 358mg) + (100g Pomme Rouge: 107mg) + (50g Riz: 17.5mg) + (150g Poulet: 384mg) + (100g Carotte: 320mg) + (100g Saumon: 628mg) + (150g Yaourt: 211.5mg) + (1 portion Smoothie: 249.5mg) = 2275.5mg
+        assertEquals(2275.5f, response.getBody().nutrients().getK(), 0.1f);
     }
 
     @Test
@@ -495,69 +496,69 @@ class JournalControllerIntegrationTests {
         assertEquals("2024-01-01", response.getBody().date().toString());
         assertEquals(1, response.getBody().repas());
         assertNotNull(response.getBody().alimentQuantites());
-        assertEquals(2, response.getBody().alimentQuantites().size()); // Banane + Riz
+        assertEquals(3, response.getBody().alimentQuantites().size()); // Banane + Riz + Pomme Rouge
 
         // Vérifier les totaux nutritionnels détaillés du petit-déjeuner
         // Petit-déjeuner modifié (test #9): 100g Banane + 50g Riz Blanc
         assertNotNull(response.getBody().nutrients());
 
-        // Calories: (100g Banane: 89 cal) + (50g Riz: 65 cal) = 154 cal
-        assertEquals(154.0f, response.getBody().nutrients().getCalories(), 0.01f);
+        // Calories: (100g Banane: 89 cal) + (50g Riz: 65 cal) + (100g Pomme Rouge: 52 cal) = 206 cal
+        assertEquals(206.0f, response.getBody().nutrients().getCalories(), 0.01f);
 
         // Macronutriments détaillés:
-        // Matières grasses: (100g Banane: 0.3g) + (50g Riz: 0.15g) = 0.45g
-        assertEquals(0.45f, response.getBody().nutrients().getMatieresGrasses(), 0.01f);
+        // Matières grasses: (100g Banane: 0.3g) + (50g Riz: 0.15g) + (100g Pomme Rouge: 0.2g) = 0.65g
+        assertEquals(0.65f, response.getBody().nutrients().getMatieresGrasses(), 0.01f);
 
-        // Matières grasses saturées: (100g Banane: 0.11g) + (50g Riz: 0.04g) = 0.15g
-        assertEquals(0.15f, response.getBody().nutrients().getMatieresGrassesSatures(), 0.01f);
+        // Matières grasses saturées: (100g Banane: 0.11g) + (50g Riz: 0.04g) + (100g Pomme Rouge: 0.03g) = 0.18g
+        assertEquals(0.18f, response.getBody().nutrients().getMatieresGrassesSatures(), 0.01f);
 
-        // Protéines: (100g Banane: 1.1g) + (50g Riz: 1.35g) = 2.45g
-        assertEquals(2.45f, response.getBody().nutrients().getProteines(), 0.01f);
+        // Protéines: (100g Banane: 1.1g) + (50g Riz: 1.35g) + (100g Pomme Rouge: 0.3g) = 2.75g
+        assertEquals(2.75f, response.getBody().nutrients().getProteines(), 0.01f);
 
-        // Glucides: (100g Banane: 23g) + (50g Riz: 14g) = 37g
-        assertEquals(37.0f, response.getBody().nutrients().getGlucides(), 0.01f);
+        // Glucides: (100g Banane: 23g) + (50g Riz: 14g) + (100g Pomme Rouge: 14g) = 51g
+        assertEquals(51.0f, response.getBody().nutrients().getGlucides(), 0.01f);
 
-        // Sucre: (100g Banane: 12g) + (50g Riz: 0.05g) = 12.05g
-        assertEquals(12.05f, response.getBody().nutrients().getSucre(), 0.01f);
+        // Sucre: (100g Banane: 12g) + (50g Riz: 0.05g) + (100g Pomme Rouge: 10g) = 22.05g
+        assertEquals(22.05f, response.getBody().nutrients().getSucre(), 0.01f);
 
-        // Fibres: (100g Banane: 2.6g) + (50g Riz: 0.2g) = 2.8g
-        assertEquals(2.8f, response.getBody().nutrients().getFibres(), 0.01f);
+        // Fibres: (100g Banane: 2.6g) + (50g Riz: 0.2g) + (100g Pomme Rouge: 2.4g) = 5.2g
+        assertEquals(5.2f, response.getBody().nutrients().getFibres(), 0.01f);
 
         // Vitamines du groupe B:
-        // Vitamine B1: (100g Banane: 0.031mg) + (50g Riz: 0.035mg) = 0.066mg
-        assertEquals(0.066f, response.getBody().nutrients().getVitamineB1(), 0.001f);
+        // Vitamine B1: (100g Banane: 0.031mg) + (50g Riz: 0.035mg) + (100g Pomme Rouge: 0.026mg) = 0.092mg
+        assertEquals(0.092f, response.getBody().nutrients().getVitamineB1(), 0.001f);
 
-        // Vitamine B3: (100g Banane: 0.665mg) + (50g Riz: 0.8mg) = 1.465mg
-        assertEquals(1.465f, response.getBody().nutrients().getVitamineB3(), 0.001f);
+        // Vitamine B3: (100g Banane: 0.665mg) + (50g Riz: 0.8mg) + (100g Pomme Rouge: 0.061mg) = 1.526mg
+        assertEquals(1.526f, response.getBody().nutrients().getVitamineB3(), 0.001f);
 
-        // Vitamine B6: (100g Banane: 0.367mg) + (50g Riz: 0.082mg) = 0.449mg
-        assertEquals(0.449f, response.getBody().nutrients().getVitamineB6(), 0.001f);
+        // Vitamine B6: (100g Banane: 0.367mg) + (50g Riz: 0.082mg) + (100g Pomme Rouge: 0.005mg) = 0.454mg
+        assertEquals(0.454f, response.getBody().nutrients().getVitamineB6(), 0.001f);
 
         // Autres vitamines:
-        // Vitamine C: (100g Banane: 8.7mg) + (50g Riz: 0mg) = 8.7mg
-        assertEquals(8.7f, response.getBody().nutrients().getVitamineC(), 0.1f);
+        // Vitamine C: (100g Banane: 8.7mg) + (50g Riz: 0mg) + (100g Pomme Rouge: 4.6mg) = 13.3mg
+        assertEquals(13.3f, response.getBody().nutrients().getVitamineC(), 0.1f);
 
-        // Vitamine E: (100g Banane: 0.1mg) + (50g Riz: 0.055mg) = 0.155mg
-        assertEquals(0.155f, response.getBody().nutrients().getVitamineE(), 0.001f);
+        // Vitamine E: (100g Banane: 0.1mg) + (50g Riz: 0.055mg) + (100g Pomme Rouge: 0.18mg) = 0.335mg
+        assertEquals(0.335f, response.getBody().nutrients().getVitamineE(), 0.001f);
 
         // Minéraux essentiels:
-        // Magnésium (Mg): (100g Banane: 27mg) + (50g Riz: 12.5mg) = 39.5mg
-        assertEquals(39.5f, response.getBody().nutrients().getMg(), 0.1f);
+        // Magnésium (Mg): (100g Banane: 27mg) + (50g Riz: 12.5mg) + (100g Pomme Rouge: 5mg) = 44.5mg
+        assertEquals(44.5f, response.getBody().nutrients().getMg(), 0.1f);
 
-        // Phosphore (P): (100g Banane: 22mg) + (50g Riz: 57.5mg) = 79.5mg
-        assertEquals(79.5f, response.getBody().nutrients().getP(), 0.1f);
+        // Phosphore (P): (100g Banane: 22mg) + (50g Riz: 57.5mg) + (100g Pomme Rouge: 11mg) = 90.5mg
+        assertEquals(90.5f, response.getBody().nutrients().getP(), 0.1f);
 
-        // Potassium (K): (100g Banane: 358mg) + (50g Riz: 17.5mg) = 375.5mg
-        assertEquals(375.5f, response.getBody().nutrients().getK(), 0.1f);
+        // Potassium (K): (100g Banane: 358mg) + (50g Riz: 17.5mg) + (100g Pomme Rouge: 107mg) = 482.5mg
+        assertEquals(482.5f, response.getBody().nutrients().getK(), 0.1f);
 
-        // Zinc (Zn): (100g Banane: 0.15mg) + (50g Riz: 0.545mg) = 0.695mg
-        assertEquals(0.695f, response.getBody().nutrients().getZn(), 0.001f);
+        // Zinc (Zn): (100g Banane: 0.15mg) + (50g Riz: 0.545mg) + (100g Pomme Rouge: 0.04mg) = 0.735mg
+        assertEquals(0.735f, response.getBody().nutrients().getZn(), 0.001f);
 
-        // Manganèse (Mn): (100g Banane: 0.27mg) + (50g Riz: 0.545mg) = 0.815mg
-        assertEquals(0.815f, response.getBody().nutrients().getMn(), 0.001f);
+        // Manganèse (Mn): (100g Banane: 0.27mg) + (50g Riz: 0.545mg) + (100g Pomme Rouge: 0.035mg) = 0.85mg
+        assertEquals(0.85f, response.getBody().nutrients().getMn(), 0.001f);
 
-        // Cuivre (Cu): (100g Banane: 0.078mg) + (50g Riz: 0.11mg) = 0.188mg
-        assertEquals(0.188f, response.getBody().nutrients().getCu(), 0.001f);
+        // Cuivre (Cu): (100g Banane: 0.078mg) + (50g Riz: 0.11mg) + (100g Pomme Rouge: 0.027mg) = 0.215mg
+        assertEquals(0.215f, response.getBody().nutrients().getCu(), 0.001f);
     }
 
     @Test

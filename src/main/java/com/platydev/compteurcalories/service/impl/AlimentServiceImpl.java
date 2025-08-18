@@ -60,9 +60,9 @@ public class AlimentServiceImpl implements AlimentService {
 
         Page<Aliment> alimentPage;
         if (word != null) {
-            alimentPage = alimentRepository.findUserAlimentsByNomOrCodeBarre(pageable, "%" + word.trim().toUpperCase() + "%", user);
+            alimentPage = alimentRepository.findUserAlimentsByNomOrCodeBarre(pageable, "%" + word.trim().toUpperCase() + "%", user.getId());
         } else {
-            alimentPage = alimentRepository.findUserAliments(pageable, user);
+            alimentPage = alimentRepository.findUserAliments(pageable, user.getId());
         }
 
         List<AlimentDTO> alimentDTOS = alimentPage.getContent().stream()
@@ -84,7 +84,7 @@ public class AlimentServiceImpl implements AlimentService {
             throw new ApiException("L'ID fourni correspond à un plat, pas à un aliment");
         }
 
-        if (!aliment.getUser().equals(user) && aliment.getUser().getId() != 1L) {
+        if (!aliment.getUserId().equals(user.getId()) && aliment.getUserId() != 1L) {
             throw new ForbiddenException("Cet aliment ne vous appartient pas");
         }
 
@@ -100,7 +100,7 @@ public class AlimentServiceImpl implements AlimentService {
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Aliment aliment = alimentMapper.toEntity(alimentDTO);
-        aliment.setUser(user);
+        aliment.setUserId(user.getId());
         if (aliment.getCodeBarre() != null) {
             aliment.getCodeBarre().setAliment(aliment);
         }
@@ -114,7 +114,7 @@ public class AlimentServiceImpl implements AlimentService {
         existsByIdAndByUser(alimentId, user);
 
         Aliment aliment = alimentMapper.toEntity(alimentDTO);
-        aliment.setUser(user);
+        aliment.setUserId(user.getId());
         aliment.setId(alimentId);
 
         codeBarreRepository.findByAlimentId(alimentId).ifPresent(codeBarreRepository::delete);
@@ -137,7 +137,7 @@ public class AlimentServiceImpl implements AlimentService {
     @Override
     public boolean existsByName(String alimentName) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Aliment> alimentOptional = alimentRepository.findByNomAndUserAndPlatIsNull(alimentName, user);
+        Optional<Aliment> alimentOptional = alimentRepository.findByNomAndUserAndPlatIsNull(alimentName, user.getId());
         return alimentOptional.isPresent();
     }
 
@@ -160,7 +160,7 @@ public class AlimentServiceImpl implements AlimentService {
             throw new ApiException("L'ID fourni correspond à un plat, pas à un aliment");
         }
 
-        if (!user.equals(aliment.getUser())) {
+        if (!user.getId().equals(aliment.getUserId())) {
             throw new ForbiddenException("Cet aliment ne vous appartient pas");
         }
     }

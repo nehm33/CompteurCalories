@@ -1,8 +1,12 @@
 package com.platydev.compteurcalories.entity;
 
 import com.platydev.compteurcalories.entity.security.User;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -16,18 +20,10 @@ public class Journal {
     @EmbeddedId
     private JournalId journalId;
 
-    @ManyToOne
-    @MapsId("userId")
-    @JoinColumn(name = "user_id")
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private User user;
-
     private float calories;
 
-    public Journal(LocalDate date, Aliment aliment, User user, int repas, float calories) {
+    public Journal(LocalDate date, User user, int repas, float calories) {
         this.journalId = new JournalId(user.getId(), date, repas);
-        this.user = user;
         this.calories = calories;
     }
 }
